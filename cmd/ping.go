@@ -75,7 +75,8 @@ func runPing(cmd *cobra.Command, args []string) error {
 	spinner.Stop()
 
 	for _, item := range output.Items {
-		fmt.Println(item.Result.Output)
+		n := item.Result.Node
+		fmt.Printf("Node%d, %s, %s\n%s\n", n.ID, n.City, n.Country.Name, item.Result.Output)
 	}
 	return nil
 }
