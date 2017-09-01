@@ -41,6 +41,7 @@ type (
 	PingOutput struct {
 		ID        string      `json:"id,omitempty"`
 		Requested string      `json:"requested,omitempty"`
+		Finished  string      `json:"finished"`
 		Items     []*PingItem `json:"items,omitempty"`
 	}
 )
@@ -78,24 +79,8 @@ func (s *RunService) PingOutput(ctx context.Context, pingID PingID) (*PingOutput
 	return v, nil
 }
 
-// IsComplete returns a value indicating whether the whole output is
+// IsFinished returns a value indicating whether the whole output is
 // complete or not.
-func (o *PingOutput) IsComplete() bool {
-	if o.Requested == "" {
-		return false
-	}
-	var n int
-	for _, item := range o.Items {
-		if !item.Result.IsComplete() {
-			break
-		}
-		n++
-	}
-	return n == len(o.Items)
-}
-
-// IsComplete returns a value indicating whether the result is complete
-// or not.
-func (r *PingResult) IsComplete() bool {
-	return r.NodeID != ""
+func (o *PingOutput) IsFinished() bool {
+	return o.Finished == "true"
 }

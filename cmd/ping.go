@@ -67,7 +67,7 @@ func runPing(cmd *cobra.Command, args []string) error {
 			spinner.Stop()
 			return err
 		}
-		if output.IsComplete() {
+		if output.IsFinished() {
 			break
 		}
 	}
