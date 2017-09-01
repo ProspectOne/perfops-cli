@@ -1,4 +1,5 @@
-# perfops-cli
+# perfops-cli 
+[![Build Status](https://semaphoreci.com/api/v1/projects/77896bab-6c47-4549-8018-05f07b60d941/1495977/badge.svg)](https://semaphoreci.com/prospectone/perfops-cli)
 
 A simple command line tool to access with ProspectOne [PerfOps API](http://docs.perfops.net/).
 
