@@ -24,8 +24,8 @@ var (
 	limit int
 )
 
-func init() {
-	RootCmd.AddCommand(pingCmd)
+func initPingCmd() {
+	rootCmd.AddCommand(pingCmd)
 	pingCmd.Flags().StringVarP(&from, "from", "F", "", "A continent, region (e.g eastern europe), country, US state or city")
 	pingCmd.Flags().IntVarP(&limit, "limit", "L", 1, "The limit")
 }

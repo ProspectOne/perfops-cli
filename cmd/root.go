@@ -1,29 +1,31 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"runtime"
 
 	"github.com/spf13/cobra"
 )
 
+const versionTmpl = `perfops:
+	version:     %s
+	build date:  %s
+	git hash:    %s
+	go version:  %s
+	go compiler: %s
+	platform:    %s/%s
+`
+
 var (
-	// RootCmd is the root command of the application.
-	RootCmd = &cobra.Command{
+	// rootCmd is the root command of the application.
+	rootCmd = &cobra.Command{
 		Use:   "perfops",
 		Short: "perfops is a tool to interact with the PerfOps API",
 		Long:  `perfops is a tool to interact with the PerfOps API.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			if showVersion {
-				fmt.Printf(`perfops:
- version:     %s
- build date:  %s
- git hash:    %s
- go version:  %s
- go compiler: %s
- platform:    %s/%s
-`, version, buildDate, commitHash,
+				cmd.Printf(versionTmpl,
+					version, buildDate, commitHash,
 					runtime.Version(), runtime.Compiler, runtime.GOOS, runtime.GOARCH)
 				return
 			}
@@ -41,9 +43,16 @@ var (
 	commitHash string
 )
 
-func init() {
+// Execute executes the root command.
+func Execute() error {
+	initRootCmd()
+	initPingCmd()
+	return rootCmd.Execute()
+}
+
+func initRootCmd() {
 	envAPIKey := os.Getenv("PERFOPS_API_KEY")
 
-	RootCmd.PersistentFlags().StringVarP(&apiKey, "key", "K", envAPIKey, "The PerfOps API key (default is $PERFOPS_API_KEY)")
-	RootCmd.PersistentFlags().BoolVarP(&showVersion, "version", "v", false, "Prints the version information of perfops")
+	rootCmd.PersistentFlags().StringVarP(&apiKey, "key", "K", envAPIKey, "The PerfOps API key (default is $PERFOPS_API_KEY)")
+	rootCmd.PersistentFlags().BoolVarP(&showVersion, "version", "v", false, "Prints the version information of perfops")
 }
