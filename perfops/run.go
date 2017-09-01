@@ -3,7 +3,9 @@ package perfops
 import (
 	"context"
 	"errors"
+	"net"
 	"net/http"
+	"strings"
 )
 
 type (
@@ -74,6 +76,9 @@ type (
 
 // Ping runs a ping test.
 func (s *RunService) Ping(ctx context.Context, ping *Ping) (PingID, error) {
+	if !isValidTarget(ping.Target) {
+		return "", errors.New("target invalid")
+	}
 	body, err := newJSONReader(ping)
 	if err != nil {
 		return "", err
@@ -109,4 +114,18 @@ func (s *RunService) PingOutput(ctx context.Context, pingID PingID) (*PingOutput
 // complete or not.
 func (o *PingOutput) IsFinished() bool {
 	return o.Finished == "true"
+}
+
+// isValidTarget checks if a string is a valid target, i.e., a public
+// domain name or an IP address.
+func isValidTarget(s string) bool {
+	if len(s) == 0 {
+		return false
+	}
+	if ip := net.ParseIP(s); ip != nil {
+		return true
+	}
+	// Assume domain name and require at least one level above TLD
+	i := strings.LastIndex(s, ".")
+	return i > 0 && len(s)-i > 1
 }

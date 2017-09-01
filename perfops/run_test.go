@@ -7,13 +7,15 @@ import (
 
 func TestPing(t *testing.T) {
 	testCases := map[string]struct {
+		target string
 		pingID string
 		tr     *respondingTransport
 		err    bool
 	}{
-		"HTTP error": {"", &respondingTransport{resp: dummyResp(400, "POST", `{"Error": "an error"}`)}, true},
-		"Failed":     {"", &respondingTransport{resp: dummyResp(201, "POST", `{"Error": "an error"}`)}, true},
-		"Created":    {"0123456789abcdefghij", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "0123456789abcdefghij"}`)}, false},
+		"Invalid target": {"meep", "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, true},
+		"HTTP error":     {"example.com", "", &respondingTransport{resp: dummyResp(400, "POST", `{"Error": "an error"}`)}, true},
+		"Failed":         {"example.com", "", &respondingTransport{resp: dummyResp(201, "POST", `{"Error": "an error"}`)}, true},
+		"Created":        {"example.com", "0123456789abcdefghij", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "0123456789abcdefghij"}`)}, false},
 	}
 	ctx := context.Background()
 	for name, tc := range testCases {
@@ -22,7 +24,7 @@ func TestPing(t *testing.T) {
 			if err != nil {
 				t.Fatalf("unexpected error %v", err)
 			}
-			got, err := c.Run.Ping(ctx, &Ping{})
+			got, err := c.Run.Ping(ctx, &Ping{Target: tc.target})
 			if (err == nil && tc.err) || (err != nil && !tc.err) {
 				t.Fatalf("expected error %v; got %v", tc.err, err)
 			}
@@ -55,6 +57,27 @@ func TestPingOutput(t *testing.T) {
 			}
 			if got.IsFinished() != tc.finished {
 				t.Fatalf("expected %v; got %v", tc.finished, got.IsFinished())
+			}
+		})
+	}
+}
+
+func TestIsValidTarget(t *testing.T) {
+	testCases := map[string]struct {
+		t     string
+		valid bool
+	}{
+		"Invalid hostname": {"meep", false},
+		"Valid hostname":   {"meep.com", true},
+		"Valid IPv4":       {"123.123.123.123", true},
+		"Invalid IPv6":     {"123:123", false},
+		"Valid IPv6":       {"2001:db8::68", true},
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			got := isValidTarget(tc.t)
+			if got != tc.valid {
+				t.Fatalf("expected %v; got %v", tc.valid, got)
 			}
 		})
 	}
