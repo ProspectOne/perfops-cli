@@ -8,6 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/ProspectOne/perfops-cli/cmd/internal"
 	"github.com/ProspectOne/perfops-cli/perfops"
 )
 
@@ -45,8 +46,14 @@ func runPing(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+
+	spinner := internal.NewSpinner()
+	fmt.Println("")
+	spinner.Start()
+
 	pingID, err := c.Run.Ping(ctx, ping)
 	if err != nil {
+		spinner.Stop()
 		return err
 	}
 
@@ -57,12 +64,15 @@ func runPing(cmd *cobra.Command, args []string) error {
 		}
 
 		if output, err = c.Run.PingOutput(ctx, pingID); err != nil {
+			spinner.Stop()
 			return err
 		}
 		if output.IsComplete() {
 			break
 		}
 	}
+
+	spinner.Stop()
 
 	for _, item := range output.Items {
 		fmt.Println(item.Result.Output)
