@@ -1,39 +1,37 @@
-# perfops-cli 
+# perfops-cli
 [![Build Status](https://semaphoreci.com/api/v1/projects/77896bab-6c47-4549-8018-05f07b60d941/1495977/badge.svg)](https://semaphoreci.com/prospectone/perfops-cli)
 
 A simple command line tool to access with ProspectOne [PerfOps API](http://docs.perfops.net/).
 
 ## Setup
 
-Download the latest binary from the [releases](https://github.com/ProspectOne/perfops-cli/releases) page.
-
-If you are interested in building `perfops-cli` from source, you can install
+If you are interested in building `perfops` from source, you can install
 it via `go get`:
 
 ```sh
-go get -u github.com/ProspectOne/perfops-cli
+go get -u github.com/ProspectOne/perfops-cli -o perfops
 ```
 
 ## Usage
 
 ```
-$ perfops-cli -h
-perfops-cli is a tool to interact with the PerfOps API.
+$ perfops -h
+perfops is a tool to interact with the PerfOps API.
 
 Usage:
-  perfops-cli [flags]
-  perfops-cli [command]
+  perfops [flags]
+  perfops [command]
 
 Available Commands:
   help        Help about any command
   ping        Run a ping test on target
 
 Flags:
-  -h, --help         help for perfops-cli
+  -h, --help         help for perfops
   -K, --key string   The PerfOps API key (default is $PERFOPS_API_KEY)
-  -v, --version      Prints the version information of perfops-cli
+  -v, --version      Prints the version information of perfops
 
-Use "perfops-cli [command] --help" for more information about a command.
+Use "perfops [command] --help" for more information about a command.
 ```
 
 ## Feedback

@@ -33,7 +33,7 @@ for OS in ${PERFOPS_BUILD_PLATFORMS[@]}; do
   for ARCH in ${PERFOPS_BUILD_ARCHS[@]}; do
     echo "Building for $OS/$ARCH"
     GOARCH=$ARCH GOOS=$OS CGO_ENABLED=0 $GO_BUILD_CMD -ldflags "$GO_BUILD_LDFLAGS"\
-     -o "release/perfops-cli-$OS-$ARCH" .
-    sha256sum "release/perfops-cli-$OS-$ARCH" > "release/perfops-cli-$OS-$ARCH".sha256
+     -o "release/perfops-$OS-$ARCH" .
+    sha256sum "release/perfops-$OS-$ARCH" > "release/perfops-$OS-$ARCH".sha256
   done
 done

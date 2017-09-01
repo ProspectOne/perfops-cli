@@ -11,12 +11,12 @@ import (
 var (
 	// RootCmd is the root command of the application.
 	RootCmd = &cobra.Command{
-		Use:   "perfops-cli",
-		Short: "perfops-cli is a tool to interact with the PerfOps API",
-		Long:  `perfops-cli is a tool to interact with the PerfOps API.`,
+		Use:   "perfops",
+		Short: "perfops is a tool to interact with the PerfOps API",
+		Long:  `perfops is a tool to interact with the PerfOps API.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			if showVersion {
-				fmt.Printf(`perfops-cli:
+				fmt.Printf(`perfops:
  version:     %s
  build date:  %s
  git hash:    %s
@@ -45,5 +45,5 @@ func init() {
 	envAPIKey := os.Getenv("PERFOPS_API_KEY")
 
 	RootCmd.PersistentFlags().StringVarP(&apiKey, "key", "K", envAPIKey, "The PerfOps API key (default is $PERFOPS_API_KEY)")
-	RootCmd.PersistentFlags().BoolVarP(&showVersion, "version", "v", false, "Prints the version information of perfops-cli")
+	RootCmd.PersistentFlags().BoolVarP(&showVersion, "version", "v", false, "Prints the version information of perfops")
 }
