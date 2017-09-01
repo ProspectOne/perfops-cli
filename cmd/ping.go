@@ -3,7 +3,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -21,14 +20,12 @@ var (
 		RunE:  runPing,
 	}
 
-	nodes []string
 	from  string
 	limit int
 )
 
 func init() {
 	RootCmd.AddCommand(pingCmd)
-	pingCmd.Flags().StringSliceVarP(&nodes, "nodes", "N", []string{}, "A list of node IDs")
 	pingCmd.Flags().StringVarP(&from, "from", "F", "", "A continent, region (e.g eastern europe), country, US state or city")
 	pingCmd.Flags().IntVarP(&limit, "limit", "L", 1, "The limit")
 }
@@ -36,7 +33,6 @@ func init() {
 func runPing(cmd *cobra.Command, args []string) error {
 	ping := &perfops.Ping{
 		Target:   args[0],
-		Nodes:    strings.Join(nodes, ","),
 		Location: from,
 		Limit:    limit,
 	}
