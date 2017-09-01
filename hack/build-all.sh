@@ -15,8 +15,9 @@ COMMIT_HASH=$(git rev-parse --short HEAD 2>/dev/null)
 DATE=$(date --iso-8601)
 
 VERSION_PKG="github.com/ProspectOne/perfops-cli/cmd"
+API_PKG="github.com/ProspectOne/perfops-cli/api"
 GO_BUILD_CMD="go build -a -installsuffix cgo"
-GO_BUILD_LDFLAGS="-s -w -X $VERSION_PKG.commitHash=$COMMIT_HASH -X $VERSION_PKG.buildDate=$DATE -X $VERSION_PKG.version=$VERSION"
+GO_BUILD_LDFLAGS="-s -w -X $VERSION_PKG.commitHash=$COMMIT_HASH -X $VERSION_PKG.buildDate=$DATE -X $VERSION_PKG.version=$VERSION -X $API_PKG.libVersion=$VERSION"
 
 if [ -z "$PERFOPS_BUILD_PLATFORMS" ]; then
     PERFOPS_BUILD_PLATFORMS="linux windows darwin"
