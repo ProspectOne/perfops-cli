@@ -6,7 +6,31 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"testing"
 )
+
+func TestNewClient(t *testing.T) {
+	testClient := &http.Client{}
+	testCases := map[string]struct {
+		opts []func(c *Client) error
+		chk  func(c *Client) (interface{}, interface{})
+	}{
+		"Default":        {[]func(c *Client) error{}, func(c *Client) (interface{}, interface{}) { return nil, nil }},
+		"WithAPIKey":     {[]func(c *Client) error{WithAPIKey("abc")}, func(c *Client) (interface{}, interface{}) { return c.apiKey, "abc" }},
+		"WithHTTPClient": {[]func(c *Client) error{WithHTTPClient(testClient)}, func(c *Client) (interface{}, interface{}) { return c.client, testClient }},
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			c, err := NewClient(tc.opts...)
+			if err != nil {
+				t.Fatalf("unexpected error %v", err)
+			}
+			if got, exp := tc.chk(c); got != exp {
+				t.Fatalf("expected %v; got %v", exp, got)
+			}
+		})
+	}
+}
 
 type roundTripper interface {
 	RoundTrip(req *http.Request) (*http.Response, error)
