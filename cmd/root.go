@@ -46,6 +46,7 @@ var (
 // Execute executes the root command.
 func Execute() error {
 	initRootCmd()
+	initMTRCmd()
 	initPingCmd()
 	return rootCmd.Execute()
 }

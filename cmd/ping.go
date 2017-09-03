@@ -2,8 +2,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/spf13/cobra"
 
@@ -20,59 +18,25 @@ var (
 		RunE:  runPing,
 	}
 
-	from  string
-	limit int
+	pingFrom  string
+	pingLimit int
 )
 
 func initPingCmd() {
 	rootCmd.AddCommand(pingCmd)
-	pingCmd.Flags().StringVarP(&from, "from", "F", "", "A continent, region (e.g eastern europe), country, US state or city")
-	pingCmd.Flags().IntVarP(&limit, "limit", "L", 1, "The limit")
+	pingCmd.Flags().StringVarP(&pingFrom, "from", "F", "", "A continent, region (e.g eastern europe), country, US state or city")
+	pingCmd.Flags().IntVarP(&pingLimit, "limit", "L", 1, "The limit")
 }
 
 func runPing(cmd *cobra.Command, args []string) error {
-	ping := &perfops.Ping{
-		Target:   args[0],
-		Location: from,
-		Limit:    limit,
-	}
-
 	ctx := context.Background()
 	c, err := perfops.NewClient(perfops.WithAPIKey(apiKey))
 	if err != nil {
 		return err
 	}
-
-	spinner := internal.NewSpinner()
-	fmt.Println("")
-	spinner.Start()
-
-	pingID, err := c.Run.Ping(ctx, ping)
-	if err != nil {
-		spinner.Stop()
-		return err
-	}
-
-	var output *perfops.PingOutput
-	for {
-		select {
-		case <-time.After(250 * time.Millisecond):
-		}
-
-		if output, err = c.Run.PingOutput(ctx, pingID); err != nil {
-			spinner.Stop()
-			return err
-		}
-		if output.IsFinished() {
-			break
-		}
-	}
-
-	spinner.Stop()
-
-	for _, item := range output.Items {
-		n := item.Result.Node
-		fmt.Printf("Node%d, %s, %s\n%s\n", n.ID, n.City, n.Country.Name, item.Result.Output)
-	}
-	return nil
+	return internal.RunTest(ctx, c, args[0], pingFrom, pingLimit, func(ctx context.Context, c *perfops.Client, req *perfops.RunRequest) (perfops.TestID, error) {
+		return c.Run.Ping(ctx, req)
+	}, func(ctx context.Context, c *perfops.Client, pingID perfops.TestID) (*perfops.RunOutput, error) {
+		return c.Run.PingOutput(ctx, pingID)
+	})
 }
