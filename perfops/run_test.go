@@ -109,6 +109,7 @@ func TestIsValidTarget(t *testing.T) {
 		t     string
 		valid bool
 	}{
+		"Empty target":     {"", false},
 		"Invalid hostname": {"meep", false},
 		"Valid hostname":   {"meep.com", true},
 		"Valid IPv4":       {"123.123.123.123", true},

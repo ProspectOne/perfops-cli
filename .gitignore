@@ -32,3 +32,4 @@ _testmain.go
 
 # Coverage
 coverage.out
+coverage.html
