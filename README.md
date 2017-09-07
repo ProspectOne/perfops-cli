@@ -24,6 +24,8 @@ Usage:
 
 Available Commands:
   help        Help about any command
+  latency     Run a latency test on target
+  mtr         Run a MTR test on target
   ping        Run a ping test on target
 
 Flags:
@@ -32,6 +34,57 @@ Flags:
   -v, --version      Prints the version information of perfops
 
 Use "perfops [command] --help" for more information about a command.
+```
+
+```
+$ perfops latency -h
+Run a latency test on target.
+
+Usage:
+  perfops latency [target] [flags]
+
+Flags:
+  -F, --from string   A continent, region (e.g eastern europe), country, US state or city
+  -h, --help          help for latency
+  -L, --limit int     The limit (default 1)
+
+Global Flags:
+  -K, --key string   The PerfOps API key (default is $PERFOPS_API_KEY)
+  -v, --version      Prints the version information of perfops
+```
+
+```
+$ perfops mtr -h
+Run a MTR test on target.
+
+Usage:
+  perfops mtr [target] [flags]
+
+Flags:
+  -F, --from string   A continent, region (e.g eastern europe), country, US state or city
+  -h, --help          help for mtr
+  -L, --limit int     The limit (default 1)
+
+Global Flags:
+  -K, --key string   The PerfOps API key (default is $PERFOPS_API_KEY)
+  -v, --version      Prints the version information of perfops
+```
+
+```
+$ perfops ping -h
+Run a ping test on target.
+
+Usage:
+  perfops ping [target] [flags]
+
+Flags:
+  -F, --from string   A continent, region (e.g eastern europe), country, US state or city
+  -h, --help          help for ping
+  -L, --limit int     The limit (default 1)
+
+Global Flags:
+  -K, --key string   The PerfOps API key (default is $PERFOPS_API_KEY)
+  -v, --version      Prints the version information of perfops
 ```
 
 ## Feedback

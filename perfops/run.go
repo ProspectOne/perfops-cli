@@ -48,76 +48,34 @@ type (
 	}
 )
 
+// Latency runs a latency test.
+func (s *RunService) Latency(ctx context.Context, latency *RunRequest) (TestID, error) {
+	return s.doPostRunRequest(ctx, "/run/latency", latency)
+}
+
+// LatencyOutput returns the full latency output under a test ID.
+func (s *RunService) LatencyOutput(ctx context.Context, latencyID TestID) (*RunOutput, error) {
+	return s.doGetRunOutput(ctx, "/run/latency/", latencyID)
+}
+
 // MTR runs an MTR test.
 func (s *RunService) MTR(ctx context.Context, mtr *RunRequest) (TestID, error) {
-	if !isValidTarget(mtr.Target) {
-		return "", errors.New("target invalid")
-	}
-	body, err := newJSONReader(mtr)
-	if err != nil {
-		return "", err
-	}
-	u := s.client.BasePath + "/run/mtr"
-	req, _ := http.NewRequest("POST", u, body)
-	req = req.WithContext(ctx)
-	var raw struct {
-		Error string
-		ID    string `json:"id"`
-	}
-	if err = s.client.do(req, &raw); err != nil {
-		return "", err
-	}
-	if raw.Error != "" {
-		return "", errors.New(raw.Error)
-	}
-	return TestID(raw.ID), nil
+	return s.doPostRunRequest(ctx, "/run/mtr", mtr)
 }
 
 // MTROutput returns the full MTR output under a test ID.
 func (s *RunService) MTROutput(ctx context.Context, mtrID TestID) (*RunOutput, error) {
-	u := s.client.BasePath + "/run/mtr/" + string(mtrID)
-	req, _ := http.NewRequest("GET", u, nil)
-	var v *RunOutput
-	if err := s.client.do(req, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
+	return s.doGetRunOutput(ctx, "/run/mtr/", mtrID)
 }
 
 // Ping runs a ping test.
 func (s *RunService) Ping(ctx context.Context, ping *RunRequest) (TestID, error) {
-	if !isValidTarget(ping.Target) {
-		return "", errors.New("target invalid")
-	}
-	body, err := newJSONReader(ping)
-	if err != nil {
-		return "", err
-	}
-	u := s.client.BasePath + "/run/ping"
-	req, _ := http.NewRequest("POST", u, body)
-	req = req.WithContext(ctx)
-	var raw struct {
-		Error string
-		ID    string `json:"id"`
-	}
-	if err = s.client.do(req, &raw); err != nil {
-		return "", err
-	}
-	if raw.Error != "" {
-		return "", errors.New(raw.Error)
-	}
-	return TestID(raw.ID), nil
+	return s.doPostRunRequest(ctx, "/run/ping", ping)
 }
 
 // PingOutput returns the full ping output under a test ID.
 func (s *RunService) PingOutput(ctx context.Context, pingID TestID) (*RunOutput, error) {
-	u := s.client.BasePath + "/run/ping/" + string(pingID)
-	req, _ := http.NewRequest("GET", u, nil)
-	var v *RunOutput
-	if err := s.client.do(req, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
+	return s.doGetRunOutput(ctx, "/run/ping/", pingID)
 }
 
 // IsFinished returns a value indicating whether the whole output is
@@ -138,4 +96,36 @@ func isValidTarget(s string) bool {
 	// Assume domain name and require at least one level above TLD
 	i := strings.LastIndex(s, ".")
 	return i > 0 && len(s)-i > 1
+}
+
+func (s *RunService) doPostRunRequest(ctx context.Context, path string, runReq *RunRequest) (TestID, error) {
+	if !isValidTarget(runReq.Target) {
+		return "", errors.New("target invalid")
+	}
+	body, err := newJSONReader(runReq)
+	if err != nil {
+		return "", err
+	}
+	u := s.client.BasePath + path
+	req, _ := http.NewRequest("POST", u, body)
+	req = req.WithContext(ctx)
+	var raw struct {
+		Error string
+		ID    string `json:"id"`
+	}
+	if err = s.client.do(req, &raw); err != nil {
+		return "", err
+	}
+	if raw.Error != "" {
+		return "", errors.New(raw.Error)
+	}
+	return TestID(raw.ID), nil
+}
+
+func (s *RunService) doGetRunOutput(ctx context.Context, path string, testID TestID) (*RunOutput, error) {
+	u := s.client.BasePath + path + string(testID)
+	req, _ := http.NewRequest("GET", u, nil)
+	var v *RunOutput
+	err := s.client.do(req, &v)
+	return v, err
 }
