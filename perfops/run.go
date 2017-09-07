@@ -46,6 +46,36 @@ type (
 		Finished  string     `json:"finished"`
 		Items     []*RunItem `json:"items,omitempty"`
 	}
+
+	// DNSResolveRequest represents the parameters for a DNS resolve request.
+	DNSResolveRequest struct {
+		Target    string   `json:"target,omitempty"`
+		Param     string   `json:"param,omitempty"`
+		DNSServer string   `json:"dnsServer,omitempty"`
+		Nodes     []string `json:"nodes,omitempty"`
+		Location  string   `json:"location,omitempty"`
+	}
+
+	// DNSResolveResult represents the result of a DNS resolve output.
+	DNSResolveResult struct {
+		DNSServer string   `json:"dnsServer,omitempty"`
+		Output    []string `json:"output,omitempty"`
+		Node      *Node    `json:"node,omitempty"`
+	}
+
+	// DNSResolveItem respresents an item of a DNS resolve output.
+	DNSResolveItem struct {
+		ID     string            `json:"id,omitempty"`
+		Result *DNSResolveResult `json:"result,omitempty"`
+	}
+
+	// DNSResolveOutput represents the response of a DNS resolve output call.
+	DNSResolveOutput struct {
+		ID        string            `json:"id,omitempty"`
+		Requested string            `json:"requested,omitempty"`
+		Finished  string            `json:"finished"`
+		Items     []*DNSResolveItem `json:"items,omitempty"`
+	}
 )
 
 // Latency runs a latency test.
@@ -78,9 +108,53 @@ func (s *RunService) PingOutput(ctx context.Context, pingID TestID) (*RunOutput,
 	return s.doGetRunOutput(ctx, "/run/ping/", pingID)
 }
 
+// DNSResolve resolves a DNS record.
+func (s *RunService) DNSResolve(ctx context.Context, resolve *DNSResolveRequest) (TestID, error) {
+	if !isValidTarget(resolve.Target) {
+		return "", errors.New("target invalid")
+	}
+	if resolve.Param == "" {
+		return "", errors.New("param invalid")
+	}
+
+	body, err := newJSONReader(resolve)
+	if err != nil {
+		return "", err
+	}
+	u := s.client.BasePath + "/run/dns-resolve"
+	req, _ := http.NewRequest("POST", u, body)
+	req = req.WithContext(ctx)
+	var raw struct {
+		Error string
+		ID    string `json:"id"`
+	}
+	if err = s.client.do(req, &raw); err != nil {
+		return "", err
+	}
+	if raw.Error != "" {
+		return "", errors.New(raw.Error)
+	}
+	return TestID(raw.ID), nil
+}
+
+// DNSResolveOutput returns the full DNS resolve output under a test ID.
+func (s *RunService) DNSResolveOutput(ctx context.Context, resolveID TestID) (*DNSResolveOutput, error) {
+	u := s.client.BasePath + "/run/dns-resolve/" + string(resolveID)
+	req, _ := http.NewRequest("GET", u, nil)
+	var v *DNSResolveOutput
+	err := s.client.do(req, &v)
+	return v, err
+}
+
 // IsFinished returns a value indicating whether the whole output is
 // complete or not.
 func (o *RunOutput) IsFinished() bool {
+	return o.Finished == "true"
+}
+
+// IsFinished returns a value indicating whether the whole output is
+// complete or not.
+func (o *DNSResolveOutput) IsFinished() bool {
 	return o.Finished == "true"
 }
 

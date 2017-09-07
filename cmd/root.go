@@ -49,6 +49,7 @@ func Execute() error {
 	initlatencyCmd()
 	initMTRCmd()
 	initPingCmd()
+	initDNSResolveCmd()
 	return rootCmd.Execute()
 }
 

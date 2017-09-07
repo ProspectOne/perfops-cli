@@ -23,6 +23,7 @@ Usage:
   perfops [command]
 
 Available Commands:
+  dns-resolve Resolve a DNS record on target
   help        Help about any command
   latency     Run a latency test on target
   mtr         Run a MTR test on target
@@ -34,6 +35,24 @@ Flags:
   -v, --version      Prints the version information of perfops
 
 Use "perfops [command] --help" for more information about a command.
+```
+
+```
+$ perfops dns-resolve -h
+Resolve a DNS record on target.
+
+Usage:
+  perfops dns-resolve [target] [flags]
+
+Flags:
+  -S, --dns-server string   The DNS server to use to query for the test. You can use 127.0.0.1 to use the local resolver for location based benchmarking.
+  -F, --from string         A continent, region (e.g eastern europe), country, US state or city
+  -h, --help                help for dns-resolve
+  -P, --param string        The DNS query type. On of: A, AAAA, CNAME, MX, NAPTR, NS, PTR, SOA, SPF, SRV, TXT.
+
+Global Flags:
+  -K, --key string   The PerfOps API key (default is $PERFOPS_API_KEY)
+  -v, --version      Prints the version information of perfops
 ```
 
 ```

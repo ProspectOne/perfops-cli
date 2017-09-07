@@ -104,6 +104,65 @@ func TestPingOutput(t *testing.T) {
 	}
 }
 
+func TestDNSResolve(t *testing.T) {
+	testCases := map[string]struct {
+		target string
+		param  string
+		testID string
+		tr     *respondingTransport
+		err    error
+	}{
+		"Invalid target": {"meep", "A", "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, errors.New("target invalid")},
+		"Invalid param":  {"meep", "", "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, errors.New("param invalid")},
+		"HTTP error":     {"example.com", "A", "", &respondingTransport{resp: dummyResp(400, "POST", `{"Error": "an error"}`)}, fmt.Errorf("HTTP Error: %v", http.StatusBadRequest)},
+		"Failed":         {"example.com", "A", "", &respondingTransport{resp: dummyResp(201, "POST", `{"Error": "an error"}`)}, errors.New("an error")},
+		"Created":        {"example.com", "A", "0123456789abcdefghij", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "0123456789abcdefghij"}`)}, nil},
+	}
+	ctx := context.Background()
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			c, err := newTestClient(tc.tr)
+			if err != nil {
+				t.Fatalf("unexpected error %v", err)
+			}
+			got, err := c.Run.DNSResolve(ctx, &DNSResolveRequest{Target: tc.target, Param: tc.param})
+			if (err == nil && tc.err != nil) || (err != nil && tc.err == nil) {
+				t.Fatalf("expected error %v; got %v", tc.err, err)
+			}
+			if string(got) != tc.testID {
+				t.Fatalf("expected %v; got %v", tc.testID, got)
+			}
+		})
+	}
+}
+
+func TestDNSResolveOutput(t *testing.T) {
+	testCases := map[string]struct {
+		tr       *respondingTransport
+		err      error
+		finished bool
+	}{
+		"Incomplete": {&respondingTransport{resp: dummyResp(200, "GET", `{"id":"d1f2408ff","items":[{"id":"734df82","result":{"id":123,"message":"NO DATA"}}]}`)}, nil, false},
+		"Complete":   {&respondingTransport{resp: dummyResp(200, "GET", `{"id": "66b78cfc643ea238e0fd8ab44f512657","items": [{"id": "ae3e8bcd0fbe77d6322b89371d87d96d","result": {"dnsServer": "8.8.8.8","output": ["204.79.197.200","13.107.21.200"],"node": {"id": 5,"latitude": 50.110781326572834,"longitude": 8.68984222412098,"country": {"id": 116,"name": "Germany","continent": {"id": 3,"name": "Europe","iso": "EU"},"iso": "DE","iso_numeric": "276"},"city": "Frankfurt","sub_region": "Western Europe"}}}],"requested": "bing.com","finished": "true"}`)}, nil, true},
+	}
+	ctx := context.Background()
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			c, err := newTestClient(tc.tr)
+			if err != nil {
+				t.Fatalf("unexpected error %v", err)
+			}
+			got, err := c.Run.DNSResolveOutput(ctx, TestID("1234"))
+			if (err == nil && tc.err != nil) || (err != nil && tc.err == nil) {
+				t.Fatalf("expected error %v; got %v", tc.err, err)
+			}
+			if got.IsFinished() != tc.finished {
+				t.Fatalf("expected %v; got %v", tc.finished, got.IsFinished())
+			}
+		})
+	}
+}
+
 func TestIsValidTarget(t *testing.T) {
 	testCases := map[string]struct {
 		t     string
