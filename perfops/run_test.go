@@ -106,6 +106,38 @@ func TestPingOutput(t *testing.T) {
 	}
 }
 
+func TestTraceroute(t *testing.T) {
+	ctx := context.Background()
+	tr := &recordingTransport{}
+	c, err := newTestClient(tr)
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
+	c.Run.Traceroute(ctx, &RunRequest{Target: "example.com"})
+	if got, exp := tr.req.Method, "POST"; got != exp {
+		t.Fatalf("expected HTTP method %v; got %v", exp, got)
+	}
+	if got, exp := tr.req.URL.Path, "/run/traceroute"; got != exp {
+		t.Fatalf("expected path %v; got %v", exp, got)
+	}
+}
+
+func TestTracerouteOutput(t *testing.T) {
+	ctx := context.Background()
+	tr := &recordingTransport{}
+	c, err := newTestClient(tr)
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
+	c.Run.TracerouteOutput(ctx, TestID("1234"))
+	if got, exp := tr.req.Method, "GET"; got != exp {
+		t.Fatalf("expected HTTP method %v; got %v", exp, got)
+	}
+	if got, exp := tr.req.URL.Path, "/run/traceroute/1234"; got != exp {
+		t.Fatalf("expected path %v; got %v", exp, got)
+	}
+}
+
 func TestDNSResolve(t *testing.T) {
 	reqTestCases := map[string]struct {
 		dnsResolveReq DNSResolveRequest

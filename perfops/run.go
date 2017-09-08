@@ -108,6 +108,16 @@ func (s *RunService) PingOutput(ctx context.Context, pingID TestID) (*RunOutput,
 	return s.doGetRunOutput(ctx, "/run/ping/", pingID)
 }
 
+// Traceroute runs a traceroute test.
+func (s *RunService) Traceroute(ctx context.Context, ping *RunRequest) (TestID, error) {
+	return s.doPostRunRequest(ctx, "/run/traceroute", ping)
+}
+
+// TracerouteOutput returns the full traceroute output under a test ID.
+func (s *RunService) TracerouteOutput(ctx context.Context, pingID TestID) (*RunOutput, error) {
+	return s.doGetRunOutput(ctx, "/run/traceroute/", pingID)
+}
+
 // DNSResolve resolves a DNS record.
 func (s *RunService) DNSResolve(ctx context.Context, resolve *DNSResolveRequest) (TestID, error) {
 	if !isValidTarget(resolve.Target) {

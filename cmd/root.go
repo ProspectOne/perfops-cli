@@ -51,6 +51,7 @@ func Execute() error {
 	initlatencyCmd()
 	initMTRCmd()
 	initPingCmd()
+	initTracerouteCmd()
 	initDNSResolveCmd()
 	return rootCmd.Execute()
 }
