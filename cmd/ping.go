@@ -18,13 +18,11 @@ var (
 		RunE:  runPing,
 	}
 
-	pingFrom  string
 	pingLimit int
 )
 
 func initPingCmd() {
 	rootCmd.AddCommand(pingCmd)
-	pingCmd.Flags().StringVarP(&pingFrom, "from", "F", "", "A continent, region (e.g eastern europe), country, US state or city")
 	pingCmd.Flags().IntVarP(&pingLimit, "limit", "L", 1, "The limit")
 }
 
@@ -34,7 +32,7 @@ func runPing(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	return internal.RunTest(ctx, c, args[0], pingFrom, pingLimit, func(ctx context.Context, c *perfops.Client, req *perfops.RunRequest) (perfops.TestID, error) {
+	return internal.RunTest(ctx, c, args[0], from, pingLimit, func(ctx context.Context, c *perfops.Client, req *perfops.RunRequest) (perfops.TestID, error) {
 		return c.Run.Ping(ctx, req)
 	}, func(ctx context.Context, c *perfops.Client, pingID perfops.TestID) (*perfops.RunOutput, error) {
 		return c.Run.PingOutput(ctx, pingID)

@@ -37,6 +37,8 @@ var (
 	apiKey      string
 	showVersion bool
 
+	from string
+
 	// Version information set at build time
 	version    = "devel"
 	buildDate  string
@@ -58,4 +60,6 @@ func initRootCmd() {
 
 	rootCmd.PersistentFlags().StringVarP(&apiKey, "key", "K", envAPIKey, "The PerfOps API key (default is $PERFOPS_API_KEY)")
 	rootCmd.PersistentFlags().BoolVarP(&showVersion, "version", "v", false, "Prints the version information of perfops")
+
+	rootCmd.PersistentFlags().StringVarP(&from, "from", "F", "", "A continent, region (e.g eastern europe), country, US state or city")
 }

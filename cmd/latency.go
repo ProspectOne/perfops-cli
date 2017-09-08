@@ -18,13 +18,11 @@ var (
 		RunE:  runLatency,
 	}
 
-	latencyFrom  string
 	latencyLimit int
 )
 
 func initlatencyCmd() {
 	rootCmd.AddCommand(latencyCmd)
-	latencyCmd.Flags().StringVarP(&latencyFrom, "from", "F", "", "A continent, region (e.g eastern europe), country, US state or city")
 	latencyCmd.Flags().IntVarP(&latencyLimit, "limit", "L", 1, "The limit")
 }
 
@@ -34,7 +32,7 @@ func runLatency(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	return internal.RunTest(ctx, c, args[0], latencyFrom, latencyLimit, func(ctx context.Context, c *perfops.Client, req *perfops.RunRequest) (perfops.TestID, error) {
+	return internal.RunTest(ctx, c, args[0], from, latencyLimit, func(ctx context.Context, c *perfops.Client, req *perfops.RunRequest) (perfops.TestID, error) {
 		return c.Run.Latency(ctx, req)
 	}, func(ctx context.Context, c *perfops.Client, latencyID perfops.TestID) (*perfops.RunOutput, error) {
 		return c.Run.LatencyOutput(ctx, latencyID)

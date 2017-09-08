@@ -30,6 +30,7 @@ Available Commands:
   ping        Run a ping test on target
 
 Flags:
+  -F, --from string  A continent, region (e.g eastern europe), country, US state or city
   -h, --help         help for perfops
   -K, --key string   The PerfOps API key (default is $PERFOPS_API_KEY)
   -v, --version      Prints the version information of perfops
@@ -46,11 +47,11 @@ Usage:
 
 Flags:
   -S, --dns-server string   The DNS server to use to query for the test. You can use 127.0.0.1 to use the local resolver for location based benchmarking.
-  -F, --from string         A continent, region (e.g eastern europe), country, US state or city
   -h, --help                help for dns-resolve
   -P, --param string        The DNS query type. On of: A, AAAA, CNAME, MX, NAPTR, NS, PTR, SOA, SPF, SRV, TXT.
 
 Global Flags:
+  -F, --from string  A continent, region (e.g eastern europe), country, US state or city
   -K, --key string   The PerfOps API key (default is $PERFOPS_API_KEY)
   -v, --version      Prints the version information of perfops
 ```
@@ -63,11 +64,11 @@ Usage:
   perfops latency [target] [flags]
 
 Flags:
-  -F, --from string   A continent, region (e.g eastern europe), country, US state or city
   -h, --help          help for latency
   -L, --limit int     The limit (default 1)
 
 Global Flags:
+  -F, --from string  A continent, region (e.g eastern europe), country, US state or city
   -K, --key string   The PerfOps API key (default is $PERFOPS_API_KEY)
   -v, --version      Prints the version information of perfops
 ```
@@ -80,11 +81,11 @@ Usage:
   perfops mtr [target] [flags]
 
 Flags:
-  -F, --from string   A continent, region (e.g eastern europe), country, US state or city
   -h, --help          help for mtr
   -L, --limit int     The limit (default 1)
 
 Global Flags:
+  -F, --from string  A continent, region (e.g eastern europe), country, US state or city
   -K, --key string   The PerfOps API key (default is $PERFOPS_API_KEY)
   -v, --version      Prints the version information of perfops
 ```
@@ -97,11 +98,11 @@ Usage:
   perfops ping [target] [flags]
 
 Flags:
-  -F, --from string   A continent, region (e.g eastern europe), country, US state or city
   -h, --help          help for ping
   -L, --limit int     The limit (default 1)
 
 Global Flags:
+  -F, --from string  A continent, region (e.g eastern europe), country, US state or city
   -K, --key string   The PerfOps API key (default is $PERFOPS_API_KEY)
   -v, --version      Prints the version information of perfops
 ```

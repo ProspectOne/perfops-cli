@@ -21,14 +21,12 @@ var (
 		RunE:  runDNSResolve,
 	}
 
-	dnsResolveFrom      string
 	dnsResolveParam     string
 	dnsResolveDNSServer string
 )
 
 func initDNSResolveCmd() {
 	rootCmd.AddCommand(dnsResolveCmd)
-	dnsResolveCmd.Flags().StringVarP(&dnsResolveFrom, "from", "F", "", "A continent, region (e.g eastern europe), country, US state or city")
 	dnsResolveCmd.Flags().StringVarP(&dnsResolveParam, "param", "P", "", "The DNS query type. On of: A, AAAA, CNAME, MX, NAPTR, NS, PTR, SOA, SPF, SRV, TXT.")
 	dnsResolveCmd.Flags().StringVarP(&dnsResolveDNSServer, "dns-server", "S", "", "The DNS server to use to query for the test. You can use 127.0.0.1 to use the local resolver for location based benchmarking.")
 }
@@ -43,7 +41,7 @@ func runDNSResolve(cmd *cobra.Command, args []string) error {
 		Target:    args[0],
 		Param:     dnsResolveParam,
 		DNSServer: dnsResolveDNSServer,
-		Location:  dnsResolveFrom,
+		Location:  from,
 	}
 
 	spinner := internal.NewSpinner()
