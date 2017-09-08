@@ -1,9 +1,11 @@
 package perfops
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"testing"
 )
@@ -105,29 +107,52 @@ func TestPingOutput(t *testing.T) {
 }
 
 func TestDNSResolve(t *testing.T) {
-	testCases := map[string]struct {
-		target string
-		param  string
-		testID string
-		tr     *respondingTransport
-		err    error
+	reqTestCases := map[string]struct {
+		dnsResolveReq DNSResolveRequest
+		tr            *recordingTransport
+		expReqBody    string
 	}{
-		"Invalid target": {"meep", "A", "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, errors.New("target invalid")},
-		"Invalid param":  {"meep", "", "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, errors.New("param invalid")},
-		"HTTP error":     {"example.com", "A", "", &respondingTransport{resp: dummyResp(400, "POST", `{"Error": "an error"}`)}, fmt.Errorf("HTTP Error: %v", http.StatusBadRequest)},
-		"Failed":         {"example.com", "A", "", &respondingTransport{resp: dummyResp(201, "POST", `{"Error": "an error"}`)}, errors.New("an error")},
-		"Created":        {"example.com", "A", "0123456789abcdefghij", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "0123456789abcdefghij"}`)}, nil},
+		"Required only": {DNSResolveRequest{Target: "example.com", Param: "A", DNSServer: "127.0.0.1"}, &recordingTransport{}, `{"target":"example.com","param":"A","dnsServer":"127.0.0.1"}`},
+		"With location": {DNSResolveRequest{Target: "example.com", Param: "A", DNSServer: "127.0.0.1", Location: "Asia"}, &recordingTransport{}, `{"target":"example.com","param":"A","dnsServer":"127.0.0.1","location":"Asia"}`},
 	}
 	ctx := context.Background()
+	for name, tc := range reqTestCases {
+		t.Run(name, func(t *testing.T) {
+			c, err := newTestClient(tc.tr)
+			if err != nil {
+				t.Fatalf("unexpected error %v", err)
+			}
+			c.Run.DNSResolve(ctx, &tc.dnsResolveReq)
+			if got := reqBody(tc.tr.req); tc.expReqBody != "" && tc.expReqBody != got {
+				t.Fatalf("expected %v; got %v", tc.expReqBody, got)
+			}
+		})
+	}
+
+	testCases := map[string]struct {
+		target    string
+		param     string
+		dnsServer string
+		testID    string
+		tr        *respondingTransport
+		err       error
+	}{
+		"Invalid target":     {"meep", "A", "127.0.0.1", "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, errors.New("target invalid")},
+		"Invalid param":      {"example.com", "", "127.0.0.1", "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, errors.New("param invalid")},
+		"Invalid DNS server": {"example.com", "A", "", "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, errors.New("dns server invalid")},
+		"HTTP error":         {"example.com", "A", "127.0.0.1", "", &respondingTransport{resp: dummyResp(400, "POST", `{"Error": "an error"}`)}, fmt.Errorf("HTTP Error: %v", http.StatusBadRequest)},
+		"Failed":             {"example.com", "A", "127.0.0.1", "", &respondingTransport{resp: dummyResp(201, "POST", `{"Error": "an error"}`)}, errors.New("an error")},
+		"Created":            {"example.com", "A", "127.0.0.1", "0123456789abcdefghij", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "0123456789abcdefghij"}`)}, nil},
+	}
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
 			c, err := newTestClient(tc.tr)
 			if err != nil {
 				t.Fatalf("unexpected error %v", err)
 			}
-			got, err := c.Run.DNSResolve(ctx, &DNSResolveRequest{Target: tc.target, Param: tc.param})
-			if (err == nil && tc.err != nil) || (err != nil && tc.err == nil) {
-				t.Fatalf("expected error %v; got %v", tc.err, err)
+			got, err := c.Run.DNSResolve(ctx, &DNSResolveRequest{Target: tc.target, Param: tc.param, DNSServer: tc.dnsServer})
+			if !cmpError(err, tc.err) {
+				t.Fatalf("expected %v; got %v", tc.err, err)
 			}
 			if string(got) != tc.testID {
 				t.Fatalf("expected %v; got %v", tc.testID, got)
@@ -153,7 +178,7 @@ func TestDNSResolveOutput(t *testing.T) {
 				t.Fatalf("unexpected error %v", err)
 			}
 			got, err := c.Run.DNSResolveOutput(ctx, TestID("1234"))
-			if (err == nil && tc.err != nil) || (err != nil && tc.err == nil) {
+			if !cmpError(err, tc.err) {
 				t.Fatalf("expected error %v; got %v", tc.err, err)
 			}
 			if got.IsFinished() != tc.finished {
@@ -186,27 +211,50 @@ func TestIsValidTarget(t *testing.T) {
 }
 
 func TestDoPostRunRequest(t *testing.T) {
-	testCases := map[string]struct {
+	reqTestCases := map[string]struct {
+		runReq     RunRequest
+		tr         *recordingTransport
+		expReqBody string
+	}{
+		"Target only":             {RunRequest{Target: "example.com"}, &recordingTransport{}, `{"target":"example.com"}`},
+		"With limit":              {RunRequest{Target: "example.com", Limit: 2}, &recordingTransport{}, `{"target":"example.com","limit":2}`},
+		"With location":           {RunRequest{Target: "example.com", Location: "Asia"}, &recordingTransport{}, `{"target":"example.com","location":"Asia"}`},
+		"With limit and location": {RunRequest{Target: "example.com", Limit: 2, Location: "Asia"}, &recordingTransport{}, `{"target":"example.com","location":"Asia","limit":2}`},
+	}
+	ctx := context.Background()
+	for name, tc := range reqTestCases {
+		t.Run(name, func(t *testing.T) {
+			c, err := newTestClient(tc.tr)
+			if err != nil {
+				t.Fatalf("unexpected error %v", err)
+			}
+			c.Run.doPostRunRequest(ctx, "/run/test", &tc.runReq)
+			if got := reqBody(tc.tr.req); tc.expReqBody != "" && tc.expReqBody != got {
+				t.Fatalf("expected %v; got %v", tc.expReqBody, got)
+			}
+		})
+	}
+
+	respTestCases := map[string]struct {
 		target string
 		testID string
 		tr     *respondingTransport
 		err    error
 	}{
-		"Invalid target": {"meep", "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, errors.New("target invalid")},
+		"Invalid target": {"meep", "", &respondingTransport{}, errors.New("target invalid")},
 		"HTTP error":     {"example.com", "", &respondingTransport{resp: dummyResp(400, "POST", `{"Error": "an error"}`)}, fmt.Errorf("HTTP Error: %v", http.StatusBadRequest)},
 		"Failed":         {"example.com", "", &respondingTransport{resp: dummyResp(201, "POST", `{"Error": "an error"}`)}, errors.New("an error")},
 		"Created":        {"example.com", "0123456789abcdefghij", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "0123456789abcdefghij"}`)}, nil},
 	}
-	ctx := context.Background()
-	for name, tc := range testCases {
+	for name, tc := range respTestCases {
 		t.Run(name, func(t *testing.T) {
 			c, err := newTestClient(tc.tr)
 			if err != nil {
 				t.Fatalf("unexpected error %v", err)
 			}
 			got, err := c.Run.doPostRunRequest(ctx, "/run/test", &RunRequest{Target: tc.target})
-			if (err == nil && tc.err != nil) || (err != nil && tc.err == nil) {
-				t.Fatalf("expected error %v; got %v", tc.err, err)
+			if !cmpError(err, tc.err) {
+				t.Fatalf("expected %v; got %v", tc.err, err)
 			}
 			if string(got) != tc.testID {
 				t.Fatalf("expected %v; got %v", tc.testID, got)
@@ -232,7 +280,7 @@ func TestDoGetRunOutput(t *testing.T) {
 				t.Fatalf("unexpected error %v", err)
 			}
 			got, err := c.Run.PingOutput(ctx, TestID("1234"))
-			if (err == nil && tc.err != nil) || (err != nil && tc.err == nil) {
+			if !cmpError(err, tc.err) {
 				t.Fatalf("expected error %v; got %v", tc.err, err)
 			}
 			if got.IsFinished() != tc.finished {
@@ -240,4 +288,21 @@ func TestDoGetRunOutput(t *testing.T) {
 			}
 		})
 	}
+}
+
+func cmpError(a, b error) bool {
+	return a == b || (a != nil && b != nil && a.Error() == b.Error())
+}
+
+func reqBody(req *http.Request) string {
+	if req == nil || req.Body == nil {
+		return ""
+	}
+
+	defer req.Body.Close()
+	b, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		return ""
+	}
+	return string(bytes.TrimSpace(b))
 }

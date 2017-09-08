@@ -116,6 +116,9 @@ func (s *RunService) DNSResolve(ctx context.Context, resolve *DNSResolveRequest)
 	if resolve.Param == "" {
 		return "", errors.New("param invalid")
 	}
+	if resolve.DNSServer == "" {
+		return "", errors.New("dns server invalid")
+	}
 
 	body, err := newJSONReader(resolve)
 	if err != nil {

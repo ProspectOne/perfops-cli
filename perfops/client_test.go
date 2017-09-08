@@ -58,6 +58,16 @@ func (t *respondingTransport) RoundTrip(req *http.Request) (*http.Response, erro
 	return t.resp, nil
 }
 
+type testTransport struct {
+	req  *http.Request
+	resp *http.Response
+}
+
+func (t *testTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	t.req = req
+	return t.resp, nil
+}
+
 func dummyReq(method string) *http.Request {
 	return &http.Request{Method: method, Proto: "HTTP/1.1", ProtoMajor: 1, ProtoMinor: 1}
 }
