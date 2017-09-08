@@ -15,26 +15,24 @@ var (
 		Short: "Run a traceroute test on target",
 		Long:  `Run a traceroute test on target.`,
 		Args:  cobra.ExactArgs(1),
-		RunE:  runTraceroute,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			c, err := newPerfOpsClient()
+			if err != nil {
+				return err
+			}
+			return runTraceroute(c, args[0], from, tracerouteLimit)
+		},
 	}
 
 	tracerouteLimit int
 )
 
-func initTracerouteCmd() {
-	rootCmd.AddCommand(tracerouteCmd)
+func initTracerouteCmd(parentCmd *cobra.Command) {
+	parentCmd.AddCommand(tracerouteCmd)
 	tracerouteCmd.Flags().IntVarP(&tracerouteLimit, "limit", "L", 1, "The limit")
 }
 
-func runTraceroute(cmd *cobra.Command, args []string) error {
+func runTraceroute(c *perfops.Client, target, from string, limit int) error {
 	ctx := context.Background()
-	c, err := perfops.NewClient(perfops.WithAPIKey(apiKey))
-	if err != nil {
-		return err
-	}
-	return internal.RunTest(ctx, c, args[0], from, tracerouteLimit, func(ctx context.Context, c *perfops.Client, req *perfops.RunRequest) (perfops.TestID, error) {
-		return c.Run.Traceroute(ctx, req)
-	}, func(ctx context.Context, c *perfops.Client, tracerouteID perfops.TestID) (*perfops.RunOutput, error) {
-		return c.Run.TracerouteOutput(ctx, tracerouteID)
-	})
+	return internal.RunTest(ctx, target, from, limit, c.Run.Traceroute, c.Run.TracerouteOutput)
 }

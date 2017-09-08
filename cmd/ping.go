@@ -15,26 +15,24 @@ var (
 		Short: "Run a ping test on target",
 		Long:  `Run a ping test on target.`,
 		Args:  cobra.ExactArgs(1),
-		RunE:  runPing,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			c, err := newPerfOpsClient()
+			if err != nil {
+				return err
+			}
+			return runPing(c, args[0], from, pingLimit)
+		},
 	}
 
 	pingLimit int
 )
 
-func initPingCmd() {
-	rootCmd.AddCommand(pingCmd)
+func initPingCmd(parentCmd *cobra.Command) {
+	parentCmd.AddCommand(pingCmd)
 	pingCmd.Flags().IntVarP(&pingLimit, "limit", "L", 1, "The limit")
 }
 
-func runPing(cmd *cobra.Command, args []string) error {
+func runPing(c *perfops.Client, target, from string, limit int) error {
 	ctx := context.Background()
-	c, err := perfops.NewClient(perfops.WithAPIKey(apiKey))
-	if err != nil {
-		return err
-	}
-	return internal.RunTest(ctx, c, args[0], from, pingLimit, func(ctx context.Context, c *perfops.Client, req *perfops.RunRequest) (perfops.TestID, error) {
-		return c.Run.Ping(ctx, req)
-	}, func(ctx context.Context, c *perfops.Client, pingID perfops.TestID) (*perfops.RunOutput, error) {
-		return c.Run.PingOutput(ctx, pingID)
-	})
+	return internal.RunTest(ctx, target, from, limit, c.Run.Ping, c.Run.PingOutput)
 }

@@ -15,26 +15,24 @@ var (
 		Short: "Run a MTR test on target",
 		Long:  `Run a MTR test on target.`,
 		Args:  cobra.ExactArgs(1),
-		RunE:  runMTR,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			c, err := newPerfOpsClient()
+			if err != nil {
+				return err
+			}
+			return runMTR(c, args[0], from, mtrLimit)
+		},
 	}
 
 	mtrLimit int
 )
 
-func initMTRCmd() {
-	rootCmd.AddCommand(mtrCmd)
+func initMTRCmd(parentCmd *cobra.Command) {
+	parentCmd.AddCommand(mtrCmd)
 	mtrCmd.Flags().IntVarP(&mtrLimit, "limit", "L", 1, "The limit")
 }
 
-func runMTR(cmd *cobra.Command, args []string) error {
+func runMTR(c *perfops.Client, target, from string, limit int) error {
 	ctx := context.Background()
-	c, err := perfops.NewClient(perfops.WithAPIKey(apiKey))
-	if err != nil {
-		return err
-	}
-	return internal.RunTest(ctx, c, args[0], from, mtrLimit, func(ctx context.Context, c *perfops.Client, req *perfops.RunRequest) (perfops.TestID, error) {
-		return c.Run.MTR(ctx, req)
-	}, func(ctx context.Context, c *perfops.Client, pingID perfops.TestID) (*perfops.RunOutput, error) {
-		return c.Run.MTROutput(ctx, pingID)
-	})
+	return internal.RunTest(ctx, target, from, limit, c.Run.MTR, c.Run.MTROutput)
 }

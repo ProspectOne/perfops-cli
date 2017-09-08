@@ -5,6 +5,8 @@ import (
 	"runtime"
 
 	"github.com/spf13/cobra"
+
+	"github.com/ProspectOne/perfops-cli/perfops"
 )
 
 const versionTmpl = `perfops:
@@ -48,11 +50,11 @@ var (
 // Execute executes the root command.
 func Execute() error {
 	initRootCmd()
-	initlatencyCmd()
-	initMTRCmd()
-	initPingCmd()
-	initTracerouteCmd()
-	initDNSResolveCmd()
+	initLatencyCmd(rootCmd)
+	initMTRCmd(rootCmd)
+	initPingCmd(rootCmd)
+	initTracerouteCmd(rootCmd)
+	initDNSResolveCmd(rootCmd)
 	return rootCmd.Execute()
 }
 
@@ -63,4 +65,10 @@ func initRootCmd() {
 	rootCmd.PersistentFlags().BoolVarP(&showVersion, "version", "v", false, "Prints the version information of perfops")
 
 	rootCmd.PersistentFlags().StringVarP(&from, "from", "F", "", "A continent, region (e.g eastern europe), country, US state or city")
+}
+
+// newPerfOpsClient returns a perfops.Client object initialized with the
+// API key.
+func newPerfOpsClient() (*perfops.Client, error) {
+	return perfops.NewClient(perfops.WithAPIKey(apiKey))
 }

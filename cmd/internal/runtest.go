@@ -9,12 +9,12 @@ import (
 )
 
 type (
-	runFunc       func(ctx context.Context, c *perfops.Client, req *perfops.RunRequest) (perfops.TestID, error)
-	runOutputFunc func(ctx context.Context, c *perfops.Client, pingID perfops.TestID) (*perfops.RunOutput, error)
+	runFunc       func(ctx context.Context, req *perfops.RunRequest) (perfops.TestID, error)
+	runOutputFunc func(ctx context.Context, pingID perfops.TestID) (*perfops.RunOutput, error)
 )
 
 // RunTest runs an MTR or ping testm retrives its output and presents it to the user.
-func RunTest(ctx context.Context, client *perfops.Client, target, location string, limit int, runTest runFunc, getRunOutput runOutputFunc) error {
+func RunTest(ctx context.Context, target, location string, limit int, runTest runFunc, runOutput runOutputFunc) error {
 	runReq := &perfops.RunRequest{
 		Target:   target,
 		Location: location,
@@ -25,7 +25,7 @@ func RunTest(ctx context.Context, client *perfops.Client, target, location strin
 	fmt.Println("")
 	spinner.Start()
 
-	testID, err := runTest(ctx, client, runReq)
+	testID, err := runTest(ctx, runReq)
 	if err != nil {
 		spinner.Stop()
 		return err
@@ -37,7 +37,7 @@ func RunTest(ctx context.Context, client *perfops.Client, target, location strin
 		case <-time.After(250 * time.Millisecond):
 		}
 
-		if output, err = getRunOutput(ctx, client, testID); err != nil {
+		if output, err = runOutput(ctx, testID); err != nil {
 			spinner.Stop()
 			return err
 		}

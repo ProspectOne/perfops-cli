@@ -18,29 +18,31 @@ var (
 		Short: "Resolve a DNS record on target",
 		Long:  `Resolve a DNS record on target.`,
 		Args:  cobra.ExactArgs(1),
-		RunE:  runDNSResolve,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			c, err := newPerfOpsClient()
+			if err != nil {
+				return err
+			}
+			return runDNSResolve(c, args[0], dnsResolveParam, dnsResolveDNSServer, from)
+		},
 	}
 
 	dnsResolveParam     string
 	dnsResolveDNSServer string
 )
 
-func initDNSResolveCmd() {
-	rootCmd.AddCommand(dnsResolveCmd)
+func initDNSResolveCmd(parentCmd *cobra.Command) {
+	parentCmd.AddCommand(dnsResolveCmd)
 	dnsResolveCmd.Flags().StringVarP(&dnsResolveParam, "param", "P", "", "The DNS query type. On of: A, AAAA, CNAME, MX, NAPTR, NS, PTR, SOA, SPF, SRV, TXT.")
 	dnsResolveCmd.Flags().StringVarP(&dnsResolveDNSServer, "dns-server", "S", "", "The DNS server to use to query for the test. You can use 127.0.0.1 to use the local resolver for location based benchmarking.")
 }
 
-func runDNSResolve(cmd *cobra.Command, args []string) error {
+func runDNSResolve(c *perfops.Client, target, param, dnsServer, from string) error {
 	ctx := context.Background()
-	c, err := perfops.NewClient(perfops.WithAPIKey(apiKey))
-	if err != nil {
-		return err
-	}
 	dnsResolveReq := &perfops.DNSResolveRequest{
-		Target:    args[0],
-		Param:     dnsResolveParam,
-		DNSServer: dnsResolveDNSServer,
+		Target:    target,
+		Param:     param,
+		DNSServer: dnsServer,
 		Location:  from,
 	}
 

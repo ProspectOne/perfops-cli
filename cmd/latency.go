@@ -15,26 +15,24 @@ var (
 		Short: "Run a latency test on target",
 		Long:  `Run a latency test on target.`,
 		Args:  cobra.ExactArgs(1),
-		RunE:  runLatency,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			c, err := newPerfOpsClient()
+			if err != nil {
+				return err
+			}
+			return runLatency(c, args[0], from, latencyLimit)
+		},
 	}
 
 	latencyLimit int
 )
 
-func initlatencyCmd() {
-	rootCmd.AddCommand(latencyCmd)
+func initLatencyCmd(parentCmd *cobra.Command) {
+	parentCmd.AddCommand(latencyCmd)
 	latencyCmd.Flags().IntVarP(&latencyLimit, "limit", "L", 1, "The limit")
 }
 
-func runLatency(cmd *cobra.Command, args []string) error {
+func runLatency(c *perfops.Client, target, from string, limit int) error {
 	ctx := context.Background()
-	c, err := perfops.NewClient(perfops.WithAPIKey(apiKey))
-	if err != nil {
-		return err
-	}
-	return internal.RunTest(ctx, c, args[0], from, latencyLimit, func(ctx context.Context, c *perfops.Client, req *perfops.RunRequest) (perfops.TestID, error) {
-		return c.Run.Latency(ctx, req)
-	}, func(ctx context.Context, c *perfops.Client, latencyID perfops.TestID) (*perfops.RunOutput, error) {
-		return c.Run.LatencyOutput(ctx, latencyID)
-	})
+	return internal.RunTest(ctx, target, from, limit, c.Run.Latency, c.Run.LatencyOutput)
 }
