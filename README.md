@@ -7,6 +7,7 @@ A simple command line tool to interact with hunderds of servers around the world
 
 ## Usage
 
+Help screen
 ```
 $ perfops -h
 perfops is a tool to interact with the PerfOps API.
@@ -32,90 +33,64 @@ Flags:
 Use "perfops [command] --help" for more information about a command.
 ```
 
+## Examples
+
+Ping google.com from a random server in Eastern Europe
 ```
-$ perfops dns-resolve -h
-Resolve a DNS record on target.
+perfops ping --from "eastern europe" google.com
+Node111, Moscow, Russian Federation
+PING google.com (173.194.222.113) 56(84) bytes of data.
+64 bytes from 173.194.222.113: icmp_seq=1 ttl=50 time=11.6 ms
+64 bytes from 173.194.222.113: icmp_seq=2 ttl=50 time=11.4 ms
+64 bytes from 173.194.222.113: icmp_seq=3 ttl=50 time=11.4 ms
 
-Usage:
-  perfops dns-resolve [target] [flags]
-
-Flags:
-  -S, --dns-server string   The DNS server to use to query for the test. You can use 127.0.0.1 to use the local resolver for location based benchmarking.
-  -h, --help                help for dns-resolve
-  -P, --param string        The DNS query type. On of: A, AAAA, CNAME, MX, NAPTR, NS, PTR, SOA, SPF, SRV, TXT.
-
-Global Flags:
-  -F, --from string  A continent, region (e.g eastern europe), country, US state or city
-  -K, --key string   The PerfOps API key (default is $PERFOPS_API_KEY)
-  -v, --version      Prints the version information of perfops
+--- google.com ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 602ms
+rtt min/avg/max/mdev = 11.433/11.513/11.650/0.157 ms
 ```
 
+Traceroute to google.com from a server located in New York
 ```
-$ perfops latency -h
-Run a latency test on target.
-
-Usage:
-  perfops latency [target] [flags]
-
-Flags:
-  -h, --help          help for latency
-  -L, --limit int     The limit (default 1)
-
-Global Flags:
-  -F, --from string  A continent, region (e.g eastern europe), country, US state or city
-  -K, --key string   The PerfOps API key (default is $PERFOPS_API_KEY)
-  -v, --version      Prints the version information of perfops
-```
-
-```
-$ perfops mtr -h
-Run a MTR test on target.
-
-Usage:
-  perfops mtr [target] [flags]
-
-Flags:
-  -h, --help          help for mtr
-  -L, --limit int     The limit (default 1)
-
-Global Flags:
-  -F, --from string  A continent, region (e.g eastern europe), country, US state or city
-  -K, --key string   The PerfOps API key (default is $PERFOPS_API_KEY)
-  -v, --version      Prints the version information of perfops
+ perfops traceroute --from "New York" google.com
+Node15, New York City, United States
+traceroute to google.com (172.217.10.46), 20 hops max, 60 byte packets
+ 1  vl223-ar-02.nyc-ny.atlantic.net (45.58.33.35)  0.432 ms  0.420 ms
+ 2  vl30-ar-01.nyc-ny.as6364.net (45.58.33.1)  0.452 ms  0.411 ms
+ 3  te0-0-1-1.rcr11.ewr04.atlas.cogentco.com (38.104.44.141)  1.153 ms  1.145 ms
+ 4  154.24.52.17 (154.24.52.17)  1.142 ms te0-3-0-4.rcr21.ewr02.atlas.cogentco.com (154.24.9.9)  1.042 ms
+ 5  be2390.rcr23.jfk01.atlas.cogentco.com (154.54.80.189)  1.502 ms be2600.rcr23.jfk01.atlas.cogentco.com (154.54.40.29)  1.438 ms
+ 6  be2896.ccr41.jfk02.atlas.cogentco.com (154.54.84.201)  2.397 ms  2.193 ms
+ 7  be3294.ccr31.jfk05.atlas.cogentco.com (154.54.47.218)  2.319 ms  2.422 ms
+ 8  tata.jfk05.atlas.cogentco.com (154.54.12.18)  1.997 ms  1.955 ms
+ 9  if-ae-12-2.tcore1.N75-New-York.as6453.net (66.110.96.5)  2.256 ms  2.314 ms
+10  72.14.195.232 (72.14.195.232)  2.125 ms  2.112 ms
+11  * *
+12  216.239.62.169 (216.239.62.169)  1.621 ms 216.239.62.171 (216.239.62.171)  1.501 ms
+13  lga34s13-in-f14.1e100.net (172.217.10.46)  1.826 ms  1.857 ms
 ```
 
-```
-$ perfops ping -h
-Run a ping test on target.
-
-Usage:
-  perfops ping [target] [flags]
-
-Flags:
-  -h, --help          help for ping
-  -L, --limit int     The limit (default 1)
-
-Global Flags:
-  -F, --from string  A continent, region (e.g eastern europe), country, US state or city
-  -K, --key string   The PerfOps API key (default is $PERFOPS_API_KEY)
-  -v, --version      Prints the version information of perfops
-```
+Check ICMP latency from 9 servers located in Europe
 
 ```
-$ perfops traceroute -h
-Run a traceroute test on target.
-
-Usage:
-  perfops traceroute [target] [flags]
-
-Flags:
-  -h, --help        help for traceroute
-  -L, --limit int   The limit (default 1)
-
-Global Flags:
-  -F, --from string   A continent, region (e.g eastern europe), country, US state or city
-  -K, --key string    The PerfOps API key (default is $PERFOPS_API_KEY)
-  -v, --version       Prints the version information of perfops
+perfops latency --from europe --limit 9 google.com
+Node92, Arezzo, Italy
+7.705
+Node242, Meppel, Netherlands
+2.753
+Node215, Nottingham, United Kingdom
+9.861
+Node85, Kiev, Ukraine
+15.332
+Node196, Riga, Latvia
+47.940
+Node244, Zürich, Switzerland
+12.591
+Node194, Nuremberg, Germany
+3.697
+Node259, Luxembourg, Luxembourg
+7.928
+Node76, Vilnius, Lithuania
+24.506
 ```
 
 ## Setup
