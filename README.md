@@ -1,16 +1,9 @@
-# perfops-cli
+# PerfOps command line tool
 [![Build Status](https://semaphoreci.com/api/v1/projects/77896bab-6c47-4549-8018-05f07b60d941/1495977/badge.svg)](https://semaphoreci.com/prospectone/perfops-cli)
 
-A simple command line tool to access the Prospect One [PerfOps API](http://docs.perfops.net/).
+A simple command line tool to interact with hunderds of servers around the world. Run benchmarks and debug your infrastructure without leaving your console. [More information](https://perfops.net/cli)
 
-## Setup
-
-If you are interested in building `perfops` from source, you can install
-it via `go get`:
-
-```sh
-go get -u github.com/ProspectOne/perfops-cli -o perfops
-```
+## [Install instructions](https://github.com/ProspectOne/perfops-cli/blob/master/INSTALL.md)
 
 ## Usage
 
@@ -123,6 +116,15 @@ Global Flags:
   -F, --from string   A continent, region (e.g eastern europe), country, US state or city
   -K, --key string    The PerfOps API key (default is $PERFOPS_API_KEY)
   -v, --version       Prints the version information of perfops
+```
+
+## Setup
+
+If you are interested in building `perfops` from source, you can install
+it via `go get`:
+
+```sh
+go get -u github.com/ProspectOne/perfops-cli -o perfops
 ```
 
 ## Feedback
