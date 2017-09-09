@@ -22,7 +22,7 @@ COMMIT_HASH=$(git rev-parse --short HEAD 2>/dev/null)
 PKGVERSION="${VERSION:1}+$COMMIT_HASH"
 
 sudo apt-get update
-sudo apt-get install ruby ruby-dev rubygems build-essential rpm
+sudo apt-get install ruby-dev build-essential rpm
 sudo gem install --no-ri --no-rdoc fpm
 sudo gem install --no-ri --no-rdoc package_cloud
 
