@@ -21,8 +21,8 @@ VERSION=$(git tag -l "v*" --sort=-version:refname | head -1)
 COMMIT_HASH=$(git rev-parse --short HEAD 2>/dev/null)
 PKGVERSION="${VERSION:1}+$COMMIT_HASH"
 
-sudo apt-get update
-sudo apt-get install ruby-dev build-essential rpm
+sudo apt-get update -y
+sudo apt-get install ruby-dev build-essential rpm -y
 sudo gem install --no-ri --no-rdoc fpm
 sudo gem install --no-ri --no-rdoc package_cloud
 
