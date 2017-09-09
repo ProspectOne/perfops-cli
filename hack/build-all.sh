@@ -20,7 +20,7 @@ GO_BUILD_CMD="go build -a -installsuffix cgo"
 GO_BUILD_LDFLAGS="-s -w -X $VERSION_PKG.commitHash=$COMMIT_HASH -X $VERSION_PKG.buildDate=$DATE -X $VERSION_PKG.version=$VERSION -X $API_PKG.libVersion=$VERSION"
 
 if [ -z "$PERFOPS_BUILD_PLATFORMS" ]; then
-    PERFOPS_BUILD_PLATFORMS="linux windows darwin"
+    PERFOPS_BUILD_PLATFORMS="linux darwin"
 fi
 
 if [ -z "$PERFOPS_BUILD_ARCHS" ]; then
