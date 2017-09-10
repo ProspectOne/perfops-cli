@@ -63,7 +63,11 @@ func RunTest(ctx context.Context, target, location string, limit int, runTest ru
 
 	for _, item := range output.Items {
 		n := item.Result.Node
-		fmt.Printf("Node%d, %s, %s\n%s\n", n.ID, n.City, n.Country.Name, item.Result.Output)
+		if item.Result.Message == "" {
+			fmt.Printf("Node%d, %s, %s\n%s\n", n.ID, n.City, n.Country.Name, item.Result.Output)
+		} else {
+			fmt.Printf("Node%d, %s, %s\n%s\n", n.ID, n.City, n.Country.Name, item.Result.Message)
+		}
 	}
 	return nil
 }

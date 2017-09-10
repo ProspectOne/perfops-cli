@@ -43,8 +43,9 @@ type (
 
 	// RunResult represents the result of an MTR or ping run.
 	RunResult struct {
-		Node   *Node  `json:"node,omitempty"`
-		Output string `json:"output,omitempty"`
+		Node    *Node       `json:"node,omitempty"`
+		Output  interface{} `json:"output,omitempty"`
+		Message string      `json:"message,omitempty"`
 	}
 
 	// RunItem represents an item of an MTR or ping output.

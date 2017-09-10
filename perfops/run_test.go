@@ -52,6 +52,17 @@ func TestLatencyOutput(t *testing.T) {
 	if got, exp := tr.req.URL.Path, "/run/latency/1234"; got != exp {
 		t.Fatalf("expected path %v; got %v", exp, got)
 	}
+
+	const body = `{"id": "2e9fd0e3a444adddb9b8168e6e0f856c","items": [{"id": "186b4c4c77985f75e7cefc48289e79ff","result": {"ip": "74.125.200.113","output": "35.223","node": {"id": 58,"latitude": 22.280042521009999,"longitude": 114.1915512085,"country": {"id": 195,"name": "Hong Kong","continent": {"id": 2,"name": "Asia","iso": "AS"},"iso": "HK","iso_numeric": "344"},"city": "Hong Kong","sub_region": "Eastern Asia"}}}, {"id": "34ae843cf4d341b252a14e3d6b39281f","result": {"output": -1,"message": "100% packet loss","node": {"id": 208,"latitude": 30.255360295637001,"longitude": 120.15712738037,"country": {"id": 62,"name": "China","continent": {"id": 2,"name": "Asia","iso": "AS"},"iso": "CN","iso_numeric": "156"},"city": "Hangzhou","sub_region": "Eastern Asia"}}}],"requested": "google.com","finished": "true"}`
+	tr2 := &respondingTransport{resp: dummyResp(201, "GET", body)}
+	c, err = newTestClient(tr2)
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
+	_, err = c.Run.LatencyOutput(ctx, TestID("e5c97cee7806ca44577cc92308d3b8e8"))
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
 }
 
 func TestMTR(t *testing.T) {
