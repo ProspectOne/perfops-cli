@@ -17,14 +17,15 @@ Usage:
   perfops [command]
 
 Available Commands:
-  resolve     Resolve a DNS record on target
   help        Help about any command
   latency     Run a latency test on target
   mtr         Run a MTR test on target
   ping        Run a ping test on target
+  resolve     Resolve a DNS record on target
   traceroute  Run a traceroute test on target
 
 Flags:
+      --debug        Enables debug output
   -F, --from string  A continent, region (e.g eastern europe), country, US state or city
   -h, --help         help for perfops
   -K, --key string   The PerfOps API key (default is $PERFOPS_API_KEY)
