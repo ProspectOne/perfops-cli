@@ -35,9 +35,10 @@ const versionTmpl = `perfops:
 var (
 	// rootCmd is the root command of the application.
 	rootCmd = &cobra.Command{
-		Use:   "perfops",
-		Short: "perfops is a tool to interact with the PerfOps API",
-		Long:  `perfops is a tool to interact with the PerfOps API.`,
+		Use:          "perfops",
+		Short:        "perfops is a tool to interact with the PerfOps API",
+		Long:         `perfops is a tool to interact with the PerfOps API.`,
+		SilenceUsage: true,
 		Run: func(cmd *cobra.Command, args []string) {
 			if showVersion {
 				cmd.Printf(versionTmpl,

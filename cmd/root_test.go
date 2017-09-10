@@ -23,6 +23,8 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/spf13/cobra"
+
 	"github.com/ProspectOne/perfops-cli/perfops"
 )
 
@@ -119,6 +121,28 @@ func TestUsage(t *testing.T) {
 	}
 	if got := b.String(); got == "" {
 		t.Fatalf("expected not empty string; got %q", got)
+	}
+}
+
+func TestShowErrorOnly(t *testing.T) {
+	expErr := errors.New("error")
+	cmd := &cobra.Command{
+		Use: "test-only",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return expErr
+		},
+	}
+	var b bytes.Buffer
+	rootCmd.ResetFlags()
+	rootCmd.SetOutput(&b)
+	rootCmd.AddCommand(cmd)
+	initRootCmd()
+	rootCmd.SetArgs([]string{"test-only"})
+	if err := rootCmd.Execute(); err != expErr {
+		t.Fatalf("exepected %v; got %v", expErr, err)
+	}
+	if got, exp := b.String(), "Error: error\n"; got != exp {
+		t.Fatalf("expected %#v; got %q", exp, got)
 	}
 }
 
