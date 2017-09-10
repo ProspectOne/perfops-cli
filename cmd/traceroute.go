@@ -33,7 +33,7 @@ var (
 			if err != nil {
 				return err
 			}
-			return runTraceroute(c, args[0], from, tracerouteLimit)
+			return chkRunError(runTraceroute(c, args[0], from, tracerouteLimit))
 		},
 	}
 

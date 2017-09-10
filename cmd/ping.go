@@ -33,7 +33,7 @@ var (
 			if err != nil {
 				return err
 			}
-			return runPing(c, args[0], from, pingLimit)
+			return chkRunError(runPing(c, args[0], from, pingLimit))
 		},
 	}
 

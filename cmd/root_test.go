@@ -31,27 +31,50 @@ func TestEnvPerfOpsAPIKey(t *testing.T) {
 
 	rootCmd.ResetFlags()
 	initRootCmd()
-
 	if err := rootCmd.ParseFlags([]string{}); err != nil {
+		t.Fatalf("exepected nil; got %v", err)
+	}
+	if err := rootCmd.Execute(); err != nil {
 		t.Fatalf("exepected nil; got %v", err)
 	}
 	if got := apiKey; got != "" {
 		t.Fatalf("expected no key; got %v", got)
 	}
 
+	const apiKey2 = "Moo"
+	rootCmd.ResetFlags()
+	initRootCmd()
+	if err := rootCmd.ParseFlags([]string{"-K", apiKey2}); err != nil {
+		t.Fatalf("exepected nil; got %v", err)
+	}
+	if err := rootCmd.Execute(); err != nil {
+		t.Fatalf("exepected nil; got %v", err)
+	}
+	if got := apiKey; got != apiKey2 {
+		t.Fatalf("expected %v; got %v", apiKey2, got)
+	}
+
 	const envAPIKey = "Meep"
 	os.Setenv("PERFOPS_API_KEY", envAPIKey)
 	defer os.Unsetenv("PERFOPS_API_KEY")
-
 	rootCmd.ResetFlags()
 	initRootCmd()
-
+	if err := rootCmd.ParseFlags([]string{}); err != nil {
+		t.Fatalf("exepected nil; got %v", err)
+	}
+	if err := rootCmd.Execute(); err != nil {
+		t.Fatalf("exepected nil; got %v", err)
+	}
 	if got := apiKey; got != envAPIKey {
 		t.Fatalf("expected %v; got %v", envAPIKey, got)
 	}
 
-	const apiKey2 = "Moo"
+	rootCmd.ResetFlags()
+	initRootCmd()
 	if err := rootCmd.ParseFlags([]string{"-K", apiKey2}); err != nil {
+		t.Fatalf("exepected nil; got %v", err)
+	}
+	if err := rootCmd.Execute(); err != nil {
 		t.Fatalf("exepected nil; got %v", err)
 	}
 	if got := apiKey; got != apiKey2 {
@@ -97,6 +120,33 @@ func TestUsage(t *testing.T) {
 	if got := b.String(); got == "" {
 		t.Fatalf("expected not empty string; got %q", got)
 	}
+}
+
+type unauthorizedErr struct{}
+
+func (e *unauthorizedErr) Error() string        { return "unauthorized" }
+func (e *unauthorizedErr) IsUnauthorized() bool { return true }
+
+func TestChkRunError(t *testing.T) {
+	testCases := map[string]struct {
+		err error
+		exp error
+	}{
+		"401":           {&unauthorizedErr{}, errors.New("The API token was declined. Please correct it or do not send a token to use the free plan.")},
+		"Generic error": {errors.New("meep"), errors.New("meep")},
+		"No error":      {nil, nil},
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			if got, exp := chkRunError(tc.err), tc.exp; !cmpError(got, exp) {
+				t.Fatalf("expected %v; got %v", exp, got)
+			}
+		})
+	}
+}
+
+func cmpError(a, b error) bool {
+	return a == b || (a != nil && b != nil && a.Error() == b.Error())
 }
 
 type roundTripper interface {

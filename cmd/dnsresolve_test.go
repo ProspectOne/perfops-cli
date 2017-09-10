@@ -25,8 +25,8 @@ func TestInitDNSResolveCmd(t *testing.T) {
 
 	flags := dnsResolveCmd.Flags()
 
-	if got := flags.Lookup("param"); got == nil {
-		t.Fatal("expected param flag; got nil")
+	if got := flags.Lookup("type"); got == nil {
+		t.Fatal("expected type flag; got nil")
 	}
 	if got := flags.Lookup("dns-server"); got == nil {
 		t.Fatal("expected dns-server flag; got nil")

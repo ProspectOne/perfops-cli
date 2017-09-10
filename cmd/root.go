@@ -14,6 +14,7 @@
 package cmd
 
 import (
+	"errors"
 	"os"
 	"runtime"
 
@@ -72,9 +73,10 @@ func Execute() error {
 }
 
 func initRootCmd() {
-	envAPIKey := os.Getenv("PERFOPS_API_KEY")
+	cobra.OnInitialize(initConfig)
+	apiKey = os.Getenv("PERFOPS_API_KEY")
 
-	rootCmd.PersistentFlags().StringVarP(&apiKey, "key", "K", envAPIKey, "The PerfOps API key (default is $PERFOPS_API_KEY)")
+	rootCmd.PersistentFlags().StringVarP(&apiKey, "key", "K", "", "The PerfOps API key (default is $PERFOPS_API_KEY)")
 	rootCmd.PersistentFlags().BoolVarP(&showVersion, "version", "v", false, "Prints the version information of perfops")
 
 	rootCmd.PersistentFlags().StringVarP(&from, "from", "F", "", "A continent, region (e.g eastern europe), country, US state or city")
@@ -84,4 +86,18 @@ func initRootCmd() {
 // API key.
 func newPerfOpsClient() (*perfops.Client, error) {
 	return perfops.NewClient(perfops.WithAPIKey(apiKey))
+}
+
+func initConfig() {
+	if apiKey == "" {
+		apiKey = os.Getenv("PERFOPS_API_KEY")
+	}
+}
+
+func chkRunError(err error) error {
+	if perfops.IsUnauthorized(err) {
+		// A bit of a hack...
+		err = errors.New("The API token was declined. Please correct it or do not send a token to use the free plan.")
+	}
+	return err
 }

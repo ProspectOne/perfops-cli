@@ -33,7 +33,7 @@ var (
 			if err != nil {
 				return err
 			}
-			return runLatency(c, args[0], from, latencyLimit)
+			return chkRunError(runLatency(c, args[0], from, latencyLimit))
 		},
 	}
 

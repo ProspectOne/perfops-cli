@@ -36,7 +36,7 @@ var (
 			if err != nil {
 				return err
 			}
-			return runDNSResolve(c, args[0], dnsResolveType, dnsResolveDNSServer, from)
+			return chkRunError(runDNSResolve(c, args[0], dnsResolveType, dnsResolveDNSServer, from))
 		},
 	}
 

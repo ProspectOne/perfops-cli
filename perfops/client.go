@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"runtime"
 )
@@ -50,7 +51,39 @@ type (
 	service struct {
 		client *Client
 	}
+
+	clientError struct {
+		Code int
+		Text string
+	}
 )
+
+// Error returns
+func (err clientError) Error() string {
+	if err.Text != "" {
+		return fmt.Sprintf("%d: %s", err.Code, err.Text)
+	}
+	return fmt.Sprintf("%d", err.Code)
+}
+
+// IsUnauthorized returns a value indicating whether the error is an
+// authorization error.
+func (err *clientError) IsUnauthorized() bool {
+	return err.Code == http.StatusUnauthorized
+}
+
+type isUnauthorizeder interface {
+	IsUnauthorized() bool
+}
+
+// IsUnauthorized returns a value indicating whether the error is an
+// authorization error.
+func IsUnauthorized(err error) bool {
+	if ce, ok := err.(isUnauthorizeder); ok {
+		return ce.IsUnauthorized()
+	}
+	return false
+}
 
 // WithAPIKey sets the API key for the API client.
 func WithAPIKey(key string) func(c *Client) error {
@@ -105,10 +138,15 @@ func (c *Client) do(req *http.Request, v interface{}) error {
 		return err
 	}
 	defer closeBody(resp)
-	d := json.NewDecoder(resp.Body)
 	if resp.StatusCode >= http.StatusBadRequest {
-		return fmt.Errorf("HTTP Error: %v", http.StatusBadRequest)
+		b, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+		//fmt.Printf("***\n%v\n***\n", string(b))
+		return &clientError{Code: resp.StatusCode, Text: string(b)}
 	}
+	d := json.NewDecoder(resp.Body)
 	return d.Decode(&v)
 }
 

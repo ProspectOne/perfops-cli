@@ -17,7 +17,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -185,7 +184,7 @@ func TestDNSResolve(t *testing.T) {
 		"Invalid target":     {"meep", "A", "127.0.0.1", "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, errors.New("target invalid")},
 		"Invalid param":      {"example.com", "", "127.0.0.1", "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, errors.New("param invalid")},
 		"Invalid DNS server": {"example.com", "A", "", "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, errors.New("dns server invalid")},
-		"HTTP error":         {"example.com", "A", "127.0.0.1", "", &respondingTransport{resp: dummyResp(400, "POST", `{"Error": "an error"}`)}, fmt.Errorf("HTTP Error: %v", http.StatusBadRequest)},
+		"HTTP error":         {"example.com", "A", "127.0.0.1", "", &respondingTransport{resp: dummyResp(400, "POST", `{"Error": "an error"}`)}, errors.New(`400: {"Error": "an error"}`)},
 		"Failed":             {"example.com", "A", "127.0.0.1", "", &respondingTransport{resp: dummyResp(201, "POST", `{"Error": "an error"}`)}, errors.New("an error")},
 		"Created":            {"example.com", "A", "127.0.0.1", "0123456789abcdefghij", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "0123456789abcdefghij"}`)}, nil},
 	}
@@ -287,7 +286,8 @@ func TestDoPostRunRequest(t *testing.T) {
 		err    error
 	}{
 		"Invalid target": {"meep", "", &respondingTransport{}, errors.New("target invalid")},
-		"HTTP error":     {"example.com", "", &respondingTransport{resp: dummyResp(400, "POST", `{"Error": "an error"}`)}, fmt.Errorf("HTTP Error: %v", http.StatusBadRequest)},
+		"HTTP error":     {"example.com", "", &respondingTransport{resp: dummyResp(400, "POST", `{"Error": "an error"}`)}, errors.New(`400: {"Error": "an error"}`)},
+		"Unauthorized":   {"example.com", "", &respondingTransport{resp: dummyResp(401, "POST", `Unauthorized`)}, errors.New(`401: Unauthorized`)},
 		"Failed":         {"example.com", "", &respondingTransport{resp: dummyResp(201, "POST", `{"Error": "an error"}`)}, errors.New("an error")},
 		"Created":        {"example.com", "0123456789abcdefghij", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "0123456789abcdefghij"}`)}, nil},
 	}

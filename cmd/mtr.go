@@ -33,7 +33,7 @@ var (
 			if err != nil {
 				return err
 			}
-			return runMTR(c, args[0], from, mtrLimit)
+			return chkRunError(runMTR(c, args[0], from, mtrLimit))
 		},
 	}
 

@@ -22,6 +22,13 @@ import (
 	"testing"
 )
 
+func TestIsUnauthorized(t *testing.T) {
+	err := &clientError{http.StatusUnauthorized, ""}
+	if !IsUnauthorized(err) {
+		t.Fatalf("expected IsUnauthorized; got %v", err)
+	}
+}
+
 func TestNewClient(t *testing.T) {
 	testClient := &http.Client{}
 	testCases := map[string]struct {
