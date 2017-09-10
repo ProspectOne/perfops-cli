@@ -22,21 +22,23 @@ import (
 
 // Spinner represents the indicator.
 type Spinner struct {
-	mu       sync.Mutex
-	frames   []rune
-	length   int
-	pos      int
-	active   bool
-	stopChan chan struct{}
+	mu        sync.Mutex
+	frames    []rune
+	length    int
+	pos       int
+	active    bool
+	lastFrame int
+	stopChan  chan struct{}
 }
 
 // NewSpinner returns a spinner.
 func NewSpinner() *Spinner {
 	const frames = `|/-\`
 	return &Spinner{
-		frames:   []rune(frames),
-		length:   len([]rune(frames)),
-		stopChan: make(chan struct{}, 1),
+		frames:    []rune(frames),
+		length:    len([]rune(frames)),
+		lastFrame: -1,
+		stopChan:  make(chan struct{}, 1),
 	}
 }
 
@@ -46,6 +48,7 @@ func (s *Spinner) Start() {
 		return
 	}
 	s.active = true
+	s.lastFrame = -1
 	s.pos = 0
 	go func() {
 		for {
@@ -79,18 +82,25 @@ func (s *Spinner) Stop() {
 }
 
 func (s *Spinner) current() string {
-	r := s.frames[s.pos%s.length]
+	if s.lastFrame < 0 {
+		return ""
+	}
+	r := s.frames[s.lastFrame%s.length]
 	return string(r)
 }
 
 func (s *Spinner) next() string {
 	r := s.frames[s.pos%s.length]
+	s.lastFrame = s.pos
 	s.pos++
 	return string(r)
 }
 
 func (s *Spinner) erase() {
 	n := utf8.RuneCountInString(s.current()) + 1
+	if n == 1 {
+		return
+	}
 	for _, c := range []string{"\b", " ", "\b"} {
 		for i := 0; i < n; i++ {
 			fmt.Printf(c)
