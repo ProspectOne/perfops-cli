@@ -1,5 +1,9 @@
 # Build scripts
 
+The build scripts use the latest version tag (in the format of
+`v\d+.\d+.\d+`, e.g., `v0.1.0`) to set the version in the binary and
+packages.
+
 ## `build-all.sh`
 
 `build-all.sh` builds the `perfops` binaries. The environment variable
