@@ -17,7 +17,7 @@ Usage:
   perfops [command]
 
 Available Commands:
-  dns-resolve Resolve a DNS record on target
+  resolve     Resolve a DNS record on target
   help        Help about any command
   latency     Run a latency test on target
   mtr         Run a MTR test on target

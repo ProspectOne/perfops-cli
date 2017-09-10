@@ -27,7 +27,7 @@ import (
 
 var (
 	dnsResolveCmd = &cobra.Command{
-		Use:   "dns-resolve [target]",
+		Use:   "resolve [target]",
 		Short: "Resolve a DNS record on target",
 		Long:  `Resolve a DNS record on target.`,
 		Args:  cobra.ExactArgs(1),
@@ -36,25 +36,25 @@ var (
 			if err != nil {
 				return err
 			}
-			return runDNSResolve(c, args[0], dnsResolveParam, dnsResolveDNSServer, from)
+			return runDNSResolve(c, args[0], dnsResolveType, dnsResolveDNSServer, from)
 		},
 	}
 
-	dnsResolveParam     string
+	dnsResolveType      string
 	dnsResolveDNSServer string
 )
 
 func initDNSResolveCmd(parentCmd *cobra.Command) {
 	parentCmd.AddCommand(dnsResolveCmd)
-	dnsResolveCmd.Flags().StringVarP(&dnsResolveParam, "param", "P", "", "The DNS query type. On of: A, AAAA, CNAME, MX, NAPTR, NS, PTR, SOA, SPF, SRV, TXT.")
+	dnsResolveCmd.Flags().StringVarP(&dnsResolveType, "type", "T", "", "The DNS query type. On of: A, AAAA, CNAME, MX, NAPTR, NS, PTR, SOA, SPF, SRV, TXT.")
 	dnsResolveCmd.Flags().StringVarP(&dnsResolveDNSServer, "dns-server", "S", "", "The DNS server to use to query for the test. You can use 127.0.0.1 to use the local resolver for location based benchmarking.")
 }
 
-func runDNSResolve(c *perfops.Client, target, param, dnsServer, from string) error {
+func runDNSResolve(c *perfops.Client, target, queryType, dnsServer, from string) error {
 	ctx := context.Background()
 	dnsResolveReq := &perfops.DNSResolveRequest{
 		Target:    target,
-		Param:     param,
+		Param:     queryType,
 		DNSServer: dnsServer,
 		Location:  from,
 	}
