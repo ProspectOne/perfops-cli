@@ -21,6 +21,7 @@ import (
 
 func TestInitDNSResolveCmd(t *testing.T) {
 	parent := &cobra.Command{}
+	dnsResolveCmd.ResetFlags()
 	initDNSResolveCmd(parent)
 
 	flags := dnsResolveCmd.Flags()

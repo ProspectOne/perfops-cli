@@ -15,10 +15,12 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"runtime"
 
 	"github.com/spf13/cobra"
+	flag "github.com/spf13/pflag"
 
 	"github.com/ProspectOne/perfops-cli/perfops"
 )
@@ -96,9 +98,42 @@ func initConfig() {
 }
 
 func chkRunError(err error) error {
+	type argNamer interface {
+		ArgName() string
+	}
 	if perfops.IsUnauthorized(err) {
 		// A bit of a hack...
 		err = errors.New("The API token was declined. Please correct it or do not send a token to use the free plan.")
+	} else if namer, ok := err.(argNamer); ok {
+		rootCmd.SetHelpFunc(invalidArgHelp(namer.ArgName()))
+		err = flag.ErrHelp
 	}
 	return err
+}
+
+func invalidArgHelp(name string) func(cmd *cobra.Command, args []string) {
+	return func(cmd *cobra.Command, args []string) {
+		cmd.Println("Missing or invalid arguments:")
+		cmd.Flags().VisitAll(func(f *flag.Flag) {
+			if f.Name == name {
+				cmd.Println(fmtShortUsage(f))
+			} else if _, ok := f.Annotations[cobra.BashCompOneRequiredFlag]; ok {
+				cmd.Println(fmtShortUsage(f))
+			}
+		})
+	}
+}
+
+func fmtShortUsage(f *flag.Flag) string {
+	line := ""
+	if f.Shorthand != "" && f.ShorthandDeprecated == "" {
+		line = fmt.Sprintf("  -%s, --%s", f.Shorthand, f.Name)
+	} else {
+		line = fmt.Sprintf("  --%s", f.Name)
+	}
+	varname, _ := flag.UnquoteUsage(f)
+	if varname != "" {
+		line += " " + varname
+	}
+	return line
 }

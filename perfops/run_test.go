@@ -181,9 +181,10 @@ func TestDNSResolve(t *testing.T) {
 		tr        *respondingTransport
 		err       error
 	}{
-		"Invalid target":     {"meep", "A", "127.0.0.1", "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, errors.New("target invalid")},
-		"Invalid param":      {"example.com", "", "127.0.0.1", "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, errors.New("param invalid")},
-		"Invalid DNS server": {"example.com", "A", "", "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, errors.New("dns server invalid")},
+		"Invalid target":     {"meep", "A", "127.0.0.1", "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, &argError{"target"}},
+		"Invalid param":      {"example.com", "", "127.0.0.1", "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, &argError{"param"}},
+		"Missing DNS server": {"example.com", "A", "", "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, &argError{"dns server"}},
+		"Invalid DNS server": {"example.com", "A", "127.0", "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, &argError{"dns server"}},
 		"HTTP error":         {"example.com", "A", "127.0.0.1", "", &respondingTransport{resp: dummyResp(400, "POST", `{"Error": "an error"}`)}, errors.New(`400: {"Error": "an error"}`)},
 		"Failed":             {"example.com", "A", "127.0.0.1", "", &respondingTransport{resp: dummyResp(201, "POST", `{"Error": "an error"}`)}, errors.New("an error")},
 		"Created":            {"example.com", "A", "127.0.0.1", "0123456789abcdefghij", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "0123456789abcdefghij"}`)}, nil},
@@ -285,7 +286,7 @@ func TestDoPostRunRequest(t *testing.T) {
 		tr     *respondingTransport
 		err    error
 	}{
-		"Invalid target": {"meep", "", &respondingTransport{}, errors.New("target invalid")},
+		"Invalid target": {"meep", "", &respondingTransport{}, &argError{"target"}},
 		"HTTP error":     {"example.com", "", &respondingTransport{resp: dummyResp(400, "POST", `{"Error": "an error"}`)}, errors.New(`400: {"Error": "an error"}`)},
 		"Unauthorized":   {"example.com", "", &respondingTransport{resp: dummyResp(401, "POST", `Unauthorized`)}, errors.New(`401: Unauthorized`)},
 		"Failed":         {"example.com", "", &respondingTransport{resp: dummyResp(201, "POST", `{"Error": "an error"}`)}, errors.New("an error")},

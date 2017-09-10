@@ -16,6 +16,7 @@ package perfops
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net"
 	"net/http"
 	"strings"
@@ -89,7 +90,31 @@ type (
 		Finished  string            `json:"finished"`
 		Items     []*DNSResolveItem `json:"items,omitempty"`
 	}
+
+	argError struct {
+		name string
+	}
 )
+
+// Error returns the stirng representaiton of the error.
+func (e *argError) Error() string {
+	return fmt.Sprintf("invalid argument: %s", e.name)
+}
+
+// ArgName returns the name of the argument.
+func (e *argError) ArgName() string {
+	return e.name
+}
+
+// IsArgError retruns a value indicating whether the error represents
+// a parameter error or not.
+func IsArgError(err error) bool {
+	type argNamer interface {
+		ArgName() string
+	}
+	_, ok := err.(argNamer)
+	return ok
+}
 
 // Latency runs a latency test.
 func (s *RunService) Latency(ctx context.Context, latency *RunRequest) (TestID, error) {
@@ -134,13 +159,13 @@ func (s *RunService) TracerouteOutput(ctx context.Context, pingID TestID) (*RunO
 // DNSResolve resolves a DNS record.
 func (s *RunService) DNSResolve(ctx context.Context, resolve *DNSResolveRequest) (TestID, error) {
 	if !isValidTarget(resolve.Target) {
-		return "", errors.New("target invalid")
+		return "", &argError{"target"}
 	}
 	if resolve.Param == "" {
-		return "", errors.New("param invalid")
+		return "", &argError{"param"}
 	}
-	if resolve.DNSServer == "" {
-		return "", errors.New("dns server invalid")
+	if ip := net.ParseIP(resolve.DNSServer); ip == nil {
+		return "", &argError{"dns server"}
 	}
 
 	body, err := newJSONReader(resolve)
@@ -187,7 +212,7 @@ func (o *DNSResolveOutput) IsFinished() bool {
 // isValidTarget checks if a string is a valid target, i.e., a public
 // domain name or an IP address.
 func isValidTarget(s string) bool {
-	if len(s) == 0 {
+	if s == "" {
 		return false
 	}
 	if ip := net.ParseIP(s); ip != nil {
@@ -200,7 +225,7 @@ func isValidTarget(s string) bool {
 
 func (s *RunService) doPostRunRequest(ctx context.Context, path string, runReq *RunRequest) (TestID, error) {
 	if !isValidTarget(runReq.Target) {
-		return "", errors.New("target invalid")
+		return "", &argError{"target"}
 	}
 	body, err := newJSONReader(runReq)
 	if err != nil {

@@ -48,6 +48,8 @@ func initDNSResolveCmd(parentCmd *cobra.Command) {
 	parentCmd.AddCommand(dnsResolveCmd)
 	dnsResolveCmd.Flags().StringVarP(&dnsResolveType, "type", "T", "", "The DNS query type. On of: A, AAAA, CNAME, MX, NAPTR, NS, PTR, SOA, SPF, SRV, TXT.")
 	dnsResolveCmd.Flags().StringVarP(&dnsResolveDNSServer, "dns-server", "S", "", "The DNS server to use to query for the test. You can use 127.0.0.1 to use the local resolver for location based benchmarking.")
+	dnsResolveCmd.MarkFlagRequired("type")
+	dnsResolveCmd.MarkFlagRequired("dns-server")
 }
 
 func runDNSResolve(c *perfops.Client, target, queryType, dnsServer, from string) error {

@@ -146,17 +146,25 @@ func TestShowErrorOnly(t *testing.T) {
 	}
 }
 
-type unauthorizedErr struct{}
+type unauthedError struct{}
 
-func (e *unauthorizedErr) Error() string        { return "unauthorized" }
-func (e *unauthorizedErr) IsUnauthorized() bool { return true }
+func (e *unauthedError) Error() string        { return "unauthorized" }
+func (e *unauthedError) IsUnauthorized() bool { return true }
+
+type argError struct {
+	name string
+}
+
+func (e *argError) Error() string   { return fmt.Sprintf("invalid argument: %s", e.name) }
+func (e *argError) ArgName() string { return e.name }
 
 func TestChkRunError(t *testing.T) {
 	testCases := map[string]struct {
 		err error
 		exp error
 	}{
-		"401":           {&unauthorizedErr{}, errors.New("The API token was declined. Please correct it or do not send a token to use the free plan.")},
+		"Param error":   {&argError{"flag"}, errors.New("pflag: help requested")},
+		"401":           {&unauthedError{}, errors.New("The API token was declined. Please correct it or do not send a token to use the free plan.")},
 		"Generic error": {errors.New("meep"), errors.New("meep")},
 		"No error":      {nil, nil},
 	}
@@ -166,6 +174,25 @@ func TestChkRunError(t *testing.T) {
 				t.Fatalf("expected %v; got %v", exp, got)
 			}
 		})
+	}
+}
+
+func TestInvalidArgHelp(t *testing.T) {
+	var f string
+	var f2 string
+	var b bytes.Buffer
+	cmd := &cobra.Command{}
+	cmd.Flags().StringVarP(&f, "flag", "F", "", "A flag")
+	cmd.Flags().StringVarP(&f2, "flag2", "G", "", "A second flag")
+	cmd.MarkFlagRequired("flag2")
+	cmd.SetHelpFunc(invalidArgHelp("flag"))
+	cmd.SetOutput(&b)
+
+	if err := cmd.Execute(); err != nil {
+		t.Fatalf("exepected nil; got %v", err)
+	}
+	if got, exp := b.String(), "Missing or invalid arguments:\n  -F, --flag string\n  -G, --flag2 string\n"; got != exp {
+		t.Fatalf("expected %q; got %q", exp, got)
 	}
 }
 
