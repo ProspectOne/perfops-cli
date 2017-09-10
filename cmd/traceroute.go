@@ -47,5 +47,5 @@ func initTracerouteCmd(parentCmd *cobra.Command) {
 
 func runTraceroute(c *perfops.Client, target, from string, limit int) error {
 	ctx := context.Background()
-	return internal.RunTest(ctx, target, from, limit, c.Run.Traceroute, c.Run.TracerouteOutput)
+	return internal.RunTest(ctx, target, from, limit, debug, c.Run.Traceroute, c.Run.TracerouteOutput)
 }

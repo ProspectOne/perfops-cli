@@ -47,5 +47,5 @@ func initPingCmd(parentCmd *cobra.Command) {
 
 func runPing(c *perfops.Client, target, from string, limit int) error {
 	ctx := context.Background()
-	return internal.RunTest(ctx, target, from, limit, c.Run.Ping, c.Run.PingOutput)
+	return internal.RunTest(ctx, target, from, limit, debug, c.Run.Ping, c.Run.PingOutput)
 }

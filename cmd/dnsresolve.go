@@ -66,11 +66,16 @@ func runDNSResolve(c *perfops.Client, target, queryType, dnsServer, from string)
 	spinner.Start()
 
 	testID, err := c.Run.DNSResolve(ctx, dnsResolveReq)
+	spinner.Stop()
 	if err != nil {
-		spinner.Stop()
 		return err
 	}
 
+	if debug {
+		fmt.Printf("Test ID: %v\n", testID)
+	}
+
+	spinner.Start()
 	var output *perfops.DNSResolveOutput
 	for {
 		select {

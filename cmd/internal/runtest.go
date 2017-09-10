@@ -27,7 +27,7 @@ type (
 )
 
 // RunTest runs an MTR or ping testm retrives its output and presents it to the user.
-func RunTest(ctx context.Context, target, location string, limit int, runTest runFunc, runOutput runOutputFunc) error {
+func RunTest(ctx context.Context, target, location string, limit int, debug bool, runTest runFunc, runOutput runOutputFunc) error {
 	runReq := &perfops.RunRequest{
 		Target:   target,
 		Location: location,
@@ -39,11 +39,16 @@ func RunTest(ctx context.Context, target, location string, limit int, runTest ru
 	spinner.Start()
 
 	testID, err := runTest(ctx, runReq)
+	spinner.Stop()
 	if err != nil {
-		spinner.Stop()
 		return err
 	}
 
+	if debug {
+		fmt.Printf("Test ID: %v\n", testID)
+	}
+
+	spinner.Start()
 	var output *perfops.RunOutput
 	for {
 		select {

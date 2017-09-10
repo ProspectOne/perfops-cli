@@ -55,6 +55,7 @@ var (
 	// ApiKey defines the PerfOps API to use for API calls.
 	apiKey      string
 	showVersion bool
+	debug       bool
 
 	from string
 
@@ -81,6 +82,7 @@ func initRootCmd() {
 
 	rootCmd.PersistentFlags().StringVarP(&apiKey, "key", "K", "", "The PerfOps API key (default is $PERFOPS_API_KEY)")
 	rootCmd.PersistentFlags().BoolVarP(&showVersion, "version", "v", false, "Prints the version information of perfops")
+	rootCmd.PersistentFlags().BoolVarP(&debug, "debug", "", false, "Enables debug output")
 
 	rootCmd.PersistentFlags().StringVarP(&from, "from", "F", "", "A continent, region (e.g eastern europe), country, US state or city")
 }

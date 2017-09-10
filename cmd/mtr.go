@@ -47,5 +47,5 @@ func initMTRCmd(parentCmd *cobra.Command) {
 
 func runMTR(c *perfops.Client, target, from string, limit int) error {
 	ctx := context.Background()
-	return internal.RunTest(ctx, target, from, limit, c.Run.MTR, c.Run.MTROutput)
+	return internal.RunTest(ctx, target, from, limit, debug, c.Run.MTR, c.Run.MTROutput)
 }
