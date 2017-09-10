@@ -1,4 +1,4 @@
-# PerfOps command line tool
+# PerfOps cli - Global network testing and benchmarking
 [![Build Status](https://semaphoreci.com/api/v1/projects/77896bab-6c47-4549-8018-05f07b60d941/1495977/badge.svg)](https://semaphoreci.com/prospectone/perfops-cli)
 
 A simple command line tool to interact with hunderds of servers around the world. Run benchmarks and debug your infrastructure without leaving your console. [More information](https://perfops.net/cli)
