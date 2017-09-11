@@ -69,6 +69,7 @@ type (
 		DNSServer string   `json:"dnsServer,omitempty"`
 		Nodes     []string `json:"nodes,omitempty"`
 		Location  string   `json:"location,omitempty"`
+		Limit     int      `json:"limit,omitempty"`
 	}
 
 	// DNSResolveResult represents the result of a DNS resolve output.

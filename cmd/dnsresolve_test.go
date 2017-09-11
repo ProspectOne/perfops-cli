@@ -42,12 +42,12 @@ func TestRunDNSResolve(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
-	runDNSResolve(c, "example.com", "TXT", "127.0.0.1", "From here")
+	runDNSResolve(c, "example.com", "TXT", "127.0.0.1", "From here", 12)
 	if got, exp := tr.req.URL.Path, "/run/dns-resolve"; got != exp {
 		t.Fatalf("expected %v; got %v", exp, got)
 	}
 	got := reqBody(tr.req)
-	exp := `{"target":"example.com","param":"TXT","dnsServer":"127.0.0.1","location":"From here"}`
+	exp := `{"target":"example.com","param":"TXT","dnsServer":"127.0.0.1","location":"From here","limit":12}`
 	if got != exp {
 		t.Fatalf("expected %v; got %v", exp, got)
 	}

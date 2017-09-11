@@ -36,29 +36,32 @@ var (
 			if err != nil {
 				return err
 			}
-			return chkRunError(runDNSResolve(c, args[0], dnsResolveType, dnsResolveDNSServer, from))
+			return chkRunError(runDNSResolve(c, args[0], dnsResolveType, dnsResolveDNSServer, from, dnsResolveLimit))
 		},
 	}
 
 	dnsResolveType      string
 	dnsResolveDNSServer string
+	dnsResolveLimit     int
 )
 
 func initDNSResolveCmd(parentCmd *cobra.Command) {
 	parentCmd.AddCommand(dnsResolveCmd)
 	dnsResolveCmd.Flags().StringVarP(&dnsResolveType, "type", "T", "", "The DNS query type. On of: A, AAAA, CNAME, MX, NAPTR, NS, PTR, SOA, SPF, SRV, TXT.")
 	dnsResolveCmd.Flags().StringVarP(&dnsResolveDNSServer, "dns-server", "S", "", "The DNS server to use to query for the test. You can use 127.0.0.1 to use the local resolver for location based benchmarking.")
+	dnsResolveCmd.Flags().IntVarP(&dnsResolveLimit, "limit", "L", 1, "The maximum number of nodes to use")
 	dnsResolveCmd.MarkFlagRequired("type")
 	dnsResolveCmd.MarkFlagRequired("dns-server")
 }
 
-func runDNSResolve(c *perfops.Client, target, queryType, dnsServer, from string) error {
+func runDNSResolve(c *perfops.Client, target, queryType, dnsServer, from string, limit int) error {
 	ctx := context.Background()
 	dnsResolveReq := &perfops.DNSResolveRequest{
 		Target:    target,
 		Param:     queryType,
 		DNSServer: dnsServer,
 		Location:  from,
+		Limit:     limit,
 	}
 
 	spinner := internal.NewSpinner()
