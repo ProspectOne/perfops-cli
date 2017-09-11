@@ -42,7 +42,7 @@ var (
 
 func initLatencyCmd(parentCmd *cobra.Command) {
 	parentCmd.AddCommand(latencyCmd)
-	latencyCmd.Flags().IntVarP(&latencyLimit, "limit", "L", 1, "The limit")
+	latencyCmd.Flags().IntVarP(&latencyLimit, "limit", "L", 1, "The maximum number of nodes to use")
 }
 
 func runLatency(c *perfops.Client, target, from string, limit int) error {
