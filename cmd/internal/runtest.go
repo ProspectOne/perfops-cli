@@ -48,31 +48,43 @@ func RunTest(ctx context.Context, target, location string, limit int, debug bool
 		fmt.Printf("Test ID: %v\n", testID)
 	}
 
-	spinner.Start()
 	var output *perfops.RunOutput
+	printedIDs := map[string]bool{}
 	for {
+		spinner.Start()
 		select {
 		case <-time.After(250 * time.Millisecond):
 		}
 
-		if output, err = runOutput(ctx, testID); err != nil {
-			spinner.Stop()
+		output, err = runOutput(ctx, testID)
+		spinner.Stop()
+		if err != nil {
 			return err
 		}
+
+		printPartialOutput(output, printedIDs)
 		if output.IsFinished() {
 			break
 		}
 	}
 
-	spinner.Stop()
+	printPartialOutput(output, printedIDs)
+	return nil
+}
 
+func printPartialOutput(output *perfops.RunOutput, printedIDs map[string]bool) {
 	for _, item := range output.Items {
-		n := item.Result.Node
+		if printedIDs[item.ID] {
+			continue
+		}
+		r := item.Result
+		n := r.Node
 		if item.Result.Message == "" {
-			fmt.Printf("Node%d, %s, %s\n%s\n", n.ID, n.City, n.Country.Name, item.Result.Output)
-		} else {
-			fmt.Printf("Node%d, %s, %s\n%s\n", n.ID, n.City, n.Country.Name, item.Result.Message)
+			printedIDs[item.ID] = true
+			fmt.Printf("Node%d, %s, %s\n%s\n", n.ID, n.City, n.Country.Name, r.Output)
+		} else if r.Message != "NO DATA" {
+			printedIDs[item.ID] = true
+			fmt.Printf("Node%d, %s, %s\n%s\n", n.ID, n.City, n.Country.Name, r.Message)
 		}
 	}
-	return nil
 }

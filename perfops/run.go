@@ -77,9 +77,10 @@ type (
 
 	// DNSResolveResult represents the result of a DNS resolve output.
 	DNSResolveResult struct {
-		DNSServer string   `json:"dnsServer,omitempty"`
-		Output    []string `json:"output,omitempty"`
-		Node      *Node    `json:"node,omitempty"`
+		DNSServer string      `json:"dnsServer,omitempty"`
+		Node      *Node       `json:"node,omitempty"`
+		Output    interface{} `json:"output,omitempty"`
+		Message   string      `json:"message,omitempty"`
 	}
 
 	// DNSResolveItem respresents an item of a DNS resolve output.

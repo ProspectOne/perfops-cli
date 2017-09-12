@@ -78,27 +78,47 @@ func runDNSResolve(c *perfops.Client, target, queryType, dnsServer, from string,
 		fmt.Printf("Test ID: %v\n", testID)
 	}
 
-	spinner.Start()
 	var output *perfops.DNSResolveOutput
+	printedIDs := map[string]bool{}
 	for {
+		spinner.Start()
 		select {
 		case <-time.After(250 * time.Millisecond):
 		}
 
-		if output, err = c.Run.DNSResolveOutput(ctx, testID); err != nil {
-			spinner.Stop()
+		output, err = c.Run.DNSResolveOutput(ctx, testID)
+		spinner.Stop()
+		if err != nil {
 			return err
 		}
+
+		printPartialDNSOutput(output, printedIDs)
 		if output.IsFinished() {
 			break
 		}
 	}
 
-	spinner.Stop()
-
-	for _, item := range output.Items {
-		n := item.Result.Node
-		fmt.Printf("Node%d, %s, %s\n%s\n", n.ID, n.City, n.Country.Name, strings.Join(item.Result.Output, "\n"))
-	}
+	printPartialDNSOutput(output, printedIDs)
 	return nil
+}
+
+func printPartialDNSOutput(output *perfops.DNSResolveOutput, printedIDs map[string]bool) {
+	for _, item := range output.Items {
+		if printedIDs[item.ID] {
+			continue
+		}
+		r := item.Result
+		n := r.Node
+		if r.Message == "" {
+			printedIDs[item.ID] = true
+			o, ok := r.Output.([]string)
+			if !ok {
+				o = []string{}
+			}
+			fmt.Printf("Node%d, %s, %s\n%s\n", n.ID, n.City, n.Country.Name, strings.Join(o, "\n"))
+		} else if r.Message != "NO DATA" {
+			printedIDs[item.ID] = true
+			fmt.Printf("Node%d, %s, %s\n%s\n", n.ID, n.City, n.Country.Name, r.Message)
+		}
+	}
 }
