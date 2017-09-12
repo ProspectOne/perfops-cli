@@ -33,13 +33,15 @@ type Spinner struct {
 
 // NewSpinner returns a spinner.
 func NewSpinner() *Spinner {
-	const frames = `|/-\`
-	return &Spinner{
+	const frames = `⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏`
+	s := &Spinner{
 		frames:    []rune(frames),
-		length:    len([]rune(frames)),
+		length:    len(frames),
 		lastFrame: -1,
 		stopChan:  make(chan struct{}, 1),
 	}
+	s.length = len(s.frames)
+	return s
 }
 
 // Start will start the indicator.
