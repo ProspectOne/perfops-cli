@@ -188,17 +188,19 @@ func TestDNSResolve(t *testing.T) {
 		target    string
 		param     string
 		dnsServer string
+		limit     int
 		testID    string
 		tr        *respondingTransport
 		err       error
 	}{
-		"Invalid target":     {"meep", "A", "127.0.0.1", "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, &argError{"target"}},
-		"Invalid param":      {"example.com", "", "127.0.0.1", "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, &argError{"param"}},
-		"Missing DNS server": {"example.com", "A", "", "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, &argError{"dns server"}},
-		"Invalid DNS server": {"example.com", "A", "127.0", "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, &argError{"dns server"}},
-		"HTTP error":         {"example.com", "A", "127.0.0.1", "", &respondingTransport{resp: dummyResp(400, "POST", `{"Error": "an error"}`)}, errors.New(`400: {"Error": "an error"}`)},
-		"Failed":             {"example.com", "A", "127.0.0.1", "", &respondingTransport{resp: dummyResp(201, "POST", `{"Error": "an error"}`)}, errors.New("an error")},
-		"Created":            {"example.com", "A", "127.0.0.1", "0123456789abcdefghij", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "0123456789abcdefghij"}`)}, nil},
+		"Invalid target":     {"meep", "A", "127.0.0.1", 1, "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, &argError{"target"}},
+		"Invalid param":      {"example.com", "", "127.0.0.1", 1, "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, &argError{"param"}},
+		"Missing DNS server": {"example.com", "A", "", 1, "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, &argError{"dns server"}},
+		"Invalid DNS server": {"example.com", "A", "127.0", 1, "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, &argError{"dns server"}},
+		"Invalid limit":      {"example.com", "A", "127.0.0.1", freeMaxNodeCap + 1, "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, &argError{"limit"}},
+		"HTTP error":         {"example.com", "A", "127.0.0.1", 1, "", &respondingTransport{resp: dummyResp(400, "POST", `{"Error": "an error"}`)}, errors.New(`400: {"Error": "an error"}`)},
+		"Failed":             {"example.com", "A", "127.0.0.1", 1, "", &respondingTransport{resp: dummyResp(201, "POST", `{"Error": "an error"}`)}, errors.New("an error")},
+		"Created":            {"example.com", "A", "127.0.0.1", 1, "0123456789abcdefghij", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "0123456789abcdefghij"}`)}, nil},
 	}
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
@@ -206,7 +208,7 @@ func TestDNSResolve(t *testing.T) {
 			if err != nil {
 				t.Fatalf("unexpected error %v", err)
 			}
-			got, err := c.Run.DNSResolve(ctx, &DNSResolveRequest{Target: tc.target, Param: tc.param, DNSServer: tc.dnsServer})
+			got, err := c.Run.DNSResolve(ctx, &DNSResolveRequest{Target: tc.target, Param: tc.param, DNSServer: tc.dnsServer, Limit: tc.limit})
 			if !cmpError(err, tc.err) {
 				t.Fatalf("expected %v; got %v", tc.err, err)
 			}
@@ -266,16 +268,46 @@ func TestIsValidTarget(t *testing.T) {
 	}
 }
 
+func TestIsValidLimit(t *testing.T) {
+	testCases := map[string]struct {
+		key   string
+		limit int
+		exp   bool
+	}{
+		"No key, limit 1":   {"", 1, true},
+		"No key, limit 10":  {"", 10, true},
+		"No key, limit 20":  {"", 20, true},
+		"No key, limit 21":  {"", 21, false},
+		"No key, limit 221": {"", 221, false},
+		"Key, limit 1":      {"key", 1, true},
+		"Key, limit 10":     {"key", 10, true},
+		"Key, limit 20":     {"key", 20, true},
+		"Key, limit 21":     {"key", 21, true},
+		"Key, limit 221":    {"key", 221, true},
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			if got, exp := isValidLimit(tc.key, tc.limit), tc.exp; got != exp {
+				t.Fatalf("expected %v; got %v", exp, got)
+			}
+		})
+	}
+}
+
 func TestDoPostRunRequest(t *testing.T) {
+	errDummyTr := errors.New("Post https://api.perfops.net/run/test: dummy impl")
 	reqTestCases := map[string]struct {
 		runReq     RunRequest
 		tr         *recordingTransport
+		expErr     error
 		expReqBody string
 	}{
-		"Target only":             {RunRequest{Target: "example.com"}, &recordingTransport{}, `{"target":"example.com"}`},
-		"With limit":              {RunRequest{Target: "example.com", Limit: 2}, &recordingTransport{}, `{"target":"example.com","limit":2}`},
-		"With location":           {RunRequest{Target: "example.com", Location: "Asia"}, &recordingTransport{}, `{"target":"example.com","location":"Asia"}`},
-		"With limit and location": {RunRequest{Target: "example.com", Limit: 2, Location: "Asia"}, &recordingTransport{}, `{"target":"example.com","location":"Asia","limit":2}`},
+		"Invalid target":          {RunRequest{Target: "example"}, &recordingTransport{}, &argError{"target"}, ``},
+		"Target only":             {RunRequest{Target: "example.com"}, &recordingTransport{}, errDummyTr, `{"target":"example.com"}`},
+		"With invalid limit":      {RunRequest{Target: "example.com", Limit: freeMaxNodeCap + 2}, &recordingTransport{}, &argError{"limit"}, ``},
+		"With limit":              {RunRequest{Target: "example.com", Limit: 2}, &recordingTransport{}, errDummyTr, `{"target":"example.com","limit":2}`},
+		"With location":           {RunRequest{Target: "example.com", Location: "Asia"}, &recordingTransport{}, errDummyTr, `{"target":"example.com","location":"Asia"}`},
+		"With limit and location": {RunRequest{Target: "example.com", Limit: 2, Location: "Asia"}, &recordingTransport{}, errDummyTr, `{"target":"example.com","location":"Asia","limit":2}`},
 	}
 	ctx := context.Background()
 	for name, tc := range reqTestCases {
@@ -284,7 +316,10 @@ func TestDoPostRunRequest(t *testing.T) {
 			if err != nil {
 				t.Fatalf("unexpected error %v", err)
 			}
-			c.Run.doPostRunRequest(ctx, "/run/test", &tc.runReq)
+			_, err = c.Run.doPostRunRequest(ctx, "/run/test", &tc.runReq)
+			if !cmpError(err, tc.expErr) {
+				t.Fatalf("expected %v; got %v", tc.expErr, err)
+			}
 			if got := reqBody(tc.tr.req); tc.expReqBody != "" && tc.expReqBody != got {
 				t.Fatalf("expected %v; got %v", tc.expReqBody, got)
 			}

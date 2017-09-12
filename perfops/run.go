@@ -22,6 +22,9 @@ import (
 	"strings"
 )
 
+// The maximum number of nodes allowed for requests without an API key.
+const freeMaxNodeCap = 20
+
 type (
 	// RunService defines the interface for the run API
 	RunService service
@@ -169,6 +172,9 @@ func (s *RunService) DNSResolve(ctx context.Context, resolve *DNSResolveRequest)
 	if ip := net.ParseIP(resolve.DNSServer); ip == nil {
 		return "", &argError{"dns server"}
 	}
+	if !isValidLimit(s.client.apiKey, resolve.Limit) {
+		return "", &argError{"limit"}
+	}
 
 	body, err := newJSONReader(resolve)
 	if err != nil {
@@ -225,10 +231,20 @@ func isValidTarget(s string) bool {
 	return i > 0 && len(s)-i > 1
 }
 
+// isValidLimit retruns a value indicating whether the limit is valid,
+// e.g., for requests without an API key the limit is capped at 20.
+func isValidLimit(apiKey string, limit int) bool {
+	return apiKey != "" || limit <= freeMaxNodeCap
+}
+
 func (s *RunService) doPostRunRequest(ctx context.Context, path string, runReq *RunRequest) (TestID, error) {
 	if !isValidTarget(runReq.Target) {
 		return "", &argError{"target"}
 	}
+	if !isValidLimit(s.client.apiKey, runReq.Limit) {
+		return "", &argError{"limit"}
+	}
+
 	body, err := newJSONReader(runReq)
 	if err != nil {
 		return "", err

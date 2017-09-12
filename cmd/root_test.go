@@ -178,20 +178,30 @@ func TestChkRunError(t *testing.T) {
 }
 
 func TestInvalidArgHelp(t *testing.T) {
-	var f string
-	var f2 string
+	var fo string
+	var fr string
+	var fl string
 	var b bytes.Buffer
 	cmd := &cobra.Command{}
-	cmd.Flags().StringVarP(&f, "flag", "F", "", "A flag")
-	cmd.Flags().StringVarP(&f2, "flag2", "G", "", "A second flag")
-	cmd.MarkFlagRequired("flag2")
+	cmd.Flags().StringVarP(&fo, "flag", "F", "", "A flag")
+	cmd.Flags().StringVarP(&fr, "req", "R", "", "A second flag")
+	cmd.Flags().StringVarP(&fl, "limit", "L", "", "Limit")
+	cmd.MarkFlagRequired("req")
 	cmd.SetHelpFunc(invalidArgHelp("flag"))
 	cmd.SetOutput(&b)
-
 	if err := cmd.Execute(); err != nil {
 		t.Fatalf("exepected nil; got %v", err)
 	}
-	if got, exp := b.String(), "Missing or invalid arguments:\n  -F, --flag string\n  -G, --flag2 string\n"; got != exp {
+	if got, exp := b.String(), "Missing or invalid arguments:\n  -F, --flag string\n  -R, --req string\n"; got != exp {
+		t.Fatalf("expected %q; got %q", exp, got)
+	}
+
+	b.Reset()
+	cmd.SetHelpFunc(invalidArgHelp("limit"))
+	if err := cmd.Execute(); err != nil {
+		t.Fatalf("exepected nil; got %v", err)
+	}
+	if got, exp := b.String(), "For free users the maximum allowed number nodes for a single test is 20. Please change your limit.\n"; got != exp {
 		t.Fatalf("expected %q; got %q", exp, got)
 	}
 }

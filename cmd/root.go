@@ -114,6 +114,11 @@ func chkRunError(err error) error {
 }
 
 func invalidArgHelp(name string) func(cmd *cobra.Command, args []string) {
+	if name == "limit" {
+		return func(cmd *cobra.Command, args []string) {
+			cmd.Println("For free users the maximum allowed number nodes for a single test is 20. Please change your limit.")
+		}
+	}
 	return func(cmd *cobra.Command, args []string) {
 		cmd.Println("Missing or invalid arguments:")
 		cmd.Flags().VisitAll(func(f *flag.Flag) {

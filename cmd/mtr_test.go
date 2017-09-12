@@ -38,12 +38,12 @@ func TestRunMTR(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
-	runMTR(c, "example.com", "From here", 123)
+	runMTR(c, "example.com", "From here", 12)
 	if got, exp := tr.req.URL.Path, "/run/mtr"; got != exp {
 		t.Fatalf("expected %v; got %v", exp, got)
 	}
 	got := reqBody(tr.req)
-	exp := `{"target":"example.com","location":"From here","limit":123}`
+	exp := `{"target":"example.com","location":"From here","limit":12}`
 	if got != exp {
 		t.Fatalf("expected %v; got %v", exp, got)
 	}
