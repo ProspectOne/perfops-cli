@@ -97,8 +97,6 @@ func runDNSResolve(c *perfops.Client, target, queryType, dnsServer, from string,
 			break
 		}
 	}
-
-	printPartialDNSOutput(output, printedIDs)
 	return nil
 }
 

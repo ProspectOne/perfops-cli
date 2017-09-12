@@ -67,8 +67,6 @@ func RunTest(ctx context.Context, target, location string, limit int, debug bool
 			break
 		}
 	}
-
-	printPartialOutput(output, printedIDs)
 	return nil
 }
 
