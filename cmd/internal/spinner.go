@@ -36,7 +36,6 @@ func NewSpinner() *Spinner {
 	const frames = `⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏`
 	s := &Spinner{
 		frames:    []rune(frames),
-		length:    len(frames),
 		lastFrame: -1,
 		stopChan:  make(chan struct{}, 1),
 	}
@@ -51,7 +50,6 @@ func (s *Spinner) Start() {
 	}
 	s.active = true
 	s.lastFrame = -1
-	s.pos = 0
 	go func() {
 		for {
 			for i := 0; i < s.length; i++ {
