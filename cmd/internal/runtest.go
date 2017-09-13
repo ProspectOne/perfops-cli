@@ -53,7 +53,7 @@ func RunTest(ctx context.Context, target, location string, limit int, debug bool
 	for {
 		spinner.Start()
 		select {
-		case <-time.After(250 * time.Millisecond):
+		case <-time.After(500 * time.Millisecond):
 		}
 
 		output, err = runOutput(ctx, testID)

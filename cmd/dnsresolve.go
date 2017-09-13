@@ -83,7 +83,7 @@ func runDNSResolve(c *perfops.Client, target, queryType, dnsServer, from string,
 	for {
 		spinner.Start()
 		select {
-		case <-time.After(250 * time.Millisecond):
+		case <-time.After(500 * time.Millisecond):
 		}
 
 		output, err = c.Run.DNSResolveOutput(ctx, testID)
