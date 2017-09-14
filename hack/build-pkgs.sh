@@ -21,11 +21,10 @@ VERSION=$(git tag -l "v*" --sort=-version:refname | head -1)
 COMMIT_HASH=$(git rev-parse --short HEAD 2>/dev/null)
 PKG_VERSION="${VERSION:1}"
 
-sudo apt-get update -y
-sudo apt-get install ruby-dev build-essential rpm -y
-sudo gem install --no-ri --no-rdoc fpm
-sudo gem install --no-ri --no-rdoc package_cloud
-sudo gem install --no-ri --no-rdoc rest-client
+sudo apt-get install build-essential rpm -y
+gem install --no-ri --no-rdoc fpm
+gem install --no-ri --no-rdoc package_cloud
+gem install --no-ri --no-rdoc rest-client
 
 mkdir -p release/pkgs
 
