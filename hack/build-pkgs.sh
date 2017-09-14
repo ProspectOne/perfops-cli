@@ -25,6 +25,7 @@ sudo apt-get update -y
 sudo apt-get install ruby-dev build-essential rpm -y
 sudo gem install --no-ri --no-rdoc fpm
 sudo gem install --no-ri --no-rdoc package_cloud
+sudo gem install --no-ri --no-rdoc rest-client
 
 mkdir -p release/pkgs
 
@@ -61,4 +62,6 @@ if [[ $PACKAGECLOUD_TOKEN ]]; then
 			done
 		fi
 	done
+
+	ruby hack/prune-pkgs.rb
 fi
