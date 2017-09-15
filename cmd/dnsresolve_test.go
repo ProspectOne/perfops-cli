@@ -35,6 +35,14 @@ func TestInitDNSResolveCmd(t *testing.T) {
 }
 
 func TestRunDNSResolve(t *testing.T) {
+	testCases := map[string]struct {
+		from    string
+		nodeIDs []int
+		exp     string
+	}{
+		"Location": {"From here", []int{}, `{"target":"example.com","param":"TXT","dnsServer":"127.0.0.1","location":"From here","limit":12}`},
+		"NodeID":   {"", []int{123}, `{"target":"example.com","param":"TXT","dnsServer":"127.0.0.1","nodes":"123","limit":12}`},
+	}
 	// We're only interested in the first HTTP call, e.g., the one to get the test ID
 	// to validate our parameters got passed properly.
 	tr := &recordingTransport{}
@@ -42,13 +50,15 @@ func TestRunDNSResolve(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
-	runDNSResolve(c, "example.com", "TXT", "127.0.0.1", "From here", 12)
-	if got, exp := tr.req.URL.Path, "/run/dns-resolve"; got != exp {
-		t.Fatalf("expected %v; got %v", exp, got)
-	}
-	got := reqBody(tr.req)
-	exp := `{"target":"example.com","param":"TXT","dnsServer":"127.0.0.1","location":"From here","limit":12}`
-	if got != exp {
-		t.Fatalf("expected %v; got %v", exp, got)
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			runDNSResolve(c, "example.com", "TXT", "127.0.0.1", tc.from, tc.nodeIDs, 12)
+			if got, exp := tr.req.URL.Path, "/run/dns-resolve"; got != exp {
+				t.Fatalf("expected %v; got %v", exp, got)
+			}
+			if got, exp := reqBody(tr.req), tc.exp; got != exp {
+				t.Fatalf("expected %v; got %v", exp, got)
+			}
+		})
 	}
 }

@@ -14,11 +14,13 @@
 package perfops
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
 	"net"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -32,12 +34,15 @@ type (
 	// TestID represents the ID of an MTR or ping test.
 	TestID string
 
+	// NodeIDs represents a list of node IDs.
+	NodeIDs []int
+
 	// RunRequest represents the parameters for a ping request.
 	RunRequest struct {
 		// Target name
 		Target string `json:"target"`
 		// List of nodes ids, comma separated
-		Nodes string `json:"nodes,omitempty"`
+		Nodes NodeIDs `json:"nodes,omitempty"`
 		// Countries names, comma separated
 		Location string `json:"location,omitempty"`
 		// Max number of nodes
@@ -67,12 +72,12 @@ type (
 
 	// DNSResolveRequest represents the parameters for a DNS resolve request.
 	DNSResolveRequest struct {
-		Target    string   `json:"target,omitempty"`
-		Param     string   `json:"param,omitempty"`
-		DNSServer string   `json:"dnsServer,omitempty"`
-		Nodes     []string `json:"nodes,omitempty"`
-		Location  string   `json:"location,omitempty"`
-		Limit     int      `json:"limit,omitempty"`
+		Target    string  `json:"target,omitempty"`
+		Param     string  `json:"param,omitempty"`
+		DNSServer string  `json:"dnsServer,omitempty"`
+		Nodes     NodeIDs `json:"nodes,omitempty"`
+		Location  string  `json:"location,omitempty"`
+		Limit     int     `json:"limit,omitempty"`
 	}
 
 	// DNSResolveResult represents the result of a DNS resolve output.
@@ -120,6 +125,40 @@ func IsArgError(err error) bool {
 	}
 	_, ok := err.(argNamer)
 	return ok
+}
+
+// MarshalJSON returns the JSON encoding of NodeIDs, e.g., a comma
+// separated list.
+func (n NodeIDs) MarshalJSON() ([]byte, error) {
+	var b bytes.Buffer
+	l := len(n) - 1
+	b.WriteRune('"')
+	for i, id := range n {
+		b.WriteString(strconv.Itoa(id))
+		if i < l {
+			b.WriteRune(',')
+		}
+	}
+	b.WriteRune('"')
+	return b.Bytes(), nil
+}
+
+// UnmarshalJSON parses the JSON-encoded data.
+func (n *NodeIDs) UnmarshalJSON(data []byte) error {
+	if len(data) > 2 {
+		ids := bytes.Split(bytes.Trim(data, `"`), []byte(","))
+		*n = make(NodeIDs, len(ids))
+		for i, bid := range ids {
+			id, err := strconv.Atoi(string(bid))
+			if err != nil {
+				return err
+			}
+			(*n)[i] = id
+		}
+	} else {
+		*n = make(NodeIDs, 0)
+	}
+	return nil
 }
 
 // Latency runs a latency test.

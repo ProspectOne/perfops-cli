@@ -25,11 +25,12 @@ Available Commands:
   traceroute  Run a traceroute test on target, e.g., google.com or 8.8.8.8
 
 Flags:
-      --debug        Enables debug output
-  -F, --from string  A continent, region (e.g eastern europe), country, US state or city
-  -h, --help         help for perfops
-  -K, --key string   The PerfOps API key (default is $PERFOPS_API_KEY)
-  -v, --version      Prints the version information of perfops
+      --debug             Enables debug output
+  -F, --from string       A continent, region (e.g eastern europe), country, US state or city
+  -h, --help              help for perfops
+  -K, --key string        The PerfOps API key (default is $PERFOPS_API_KEY)
+  -N, --nodeid intSlice   A comma separated list of node IDs to run a test from
+  -v, --version           Prints the version information of perfops
 
 Use "perfops [command] --help" for more information about a command.
 ```

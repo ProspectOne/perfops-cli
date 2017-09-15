@@ -57,7 +57,8 @@ var (
 	showVersion bool
 	debug       bool
 
-	from string
+	from    string
+	nodeIDs []int
 
 	// Version information set at build time
 	version    = "devel"
@@ -85,6 +86,7 @@ func initRootCmd() {
 	rootCmd.PersistentFlags().BoolVarP(&debug, "debug", "", false, "Enables debug output")
 
 	rootCmd.PersistentFlags().StringVarP(&from, "from", "F", "", "A continent, region (e.g eastern europe), country, US state or city")
+	rootCmd.PersistentFlags().IntSliceVarP(&nodeIDs, "nodeid", "N", []int{}, "A comma separated list of node IDs to run a test from")
 }
 
 // newPerfOpsClient returns a perfops.Client object initialized with the

@@ -31,6 +31,14 @@ func TestInitTracerouteCmd(t *testing.T) {
 }
 
 func TestRunTraceroute(t *testing.T) {
+	testCases := map[string]struct {
+		from    string
+		nodeIDs []int
+		exp     string
+	}{
+		"Location": {"From here", []int{}, `{"target":"example.com","location":"From here","limit":12}`},
+		"NodeID":   {"", []int{123}, `{"target":"example.com","nodes":"123","limit":12}`},
+	}
 	// We're only interested in the first HTTP call, e.g., the one to get the test ID
 	// to validate our parameters got passed properly.
 	tr := &recordingTransport{}
@@ -38,13 +46,15 @@ func TestRunTraceroute(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
-	runTraceroute(c, "example.com", "From here", 12)
-	if got, exp := tr.req.URL.Path, "/run/traceroute"; got != exp {
-		t.Fatalf("expected %v; got %v", exp, got)
-	}
-	got := reqBody(tr.req)
-	exp := `{"target":"example.com","location":"From here","limit":12}`
-	if got != exp {
-		t.Fatalf("expected %v; got %v", exp, got)
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			runTraceroute(c, "example.com", tc.from, tc.nodeIDs, 12)
+			if got, exp := tr.req.URL.Path, "/run/traceroute"; got != exp {
+				t.Fatalf("expected %v; got %v", exp, got)
+			}
+			if got, exp := reqBody(tr.req), tc.exp; got != exp {
+				t.Fatalf("expected %v; got %v", exp, got)
+			}
+		})
 	}
 }

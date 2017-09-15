@@ -33,7 +33,7 @@ var (
 			if err != nil {
 				return err
 			}
-			return chkRunError(runTraceroute(c, args[0], from, tracerouteLimit))
+			return chkRunError(runTraceroute(c, args[0], from, nodeIDs, tracerouteLimit))
 		},
 	}
 
@@ -45,7 +45,7 @@ func initTracerouteCmd(parentCmd *cobra.Command) {
 	tracerouteCmd.Flags().IntVarP(&tracerouteLimit, "limit", "L", 1, "The maximum number of nodes to use")
 }
 
-func runTraceroute(c *perfops.Client, target, from string, limit int) error {
+func runTraceroute(c *perfops.Client, target, from string, nodeIDs []int, limit int) error {
 	ctx := context.Background()
-	return internal.RunTest(ctx, target, from, limit, debug, c.Run.Traceroute, c.Run.TracerouteOutput)
+	return internal.RunTest(ctx, target, from, nodeIDs, limit, debug, c.Run.Traceroute, c.Run.TracerouteOutput)
 }

@@ -16,11 +16,68 @@ package perfops
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"io/ioutil"
 	"net/http"
 	"testing"
 )
+
+func TestNodeIDsMarshalJSON(t *testing.T) {
+	testCases := map[string]struct {
+		ids NodeIDs
+		exp string
+	}{
+		"Empty list": {NodeIDs([]int{}), `""`},
+		"One":        {NodeIDs([]int{123}), `"123"`},
+		"Many":       {NodeIDs([]int{1, 2, 3}), `"1,2,3"`},
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			got, err := tc.ids.MarshalJSON()
+			if err != nil {
+				t.Fatalf("expected nil; got %v", err)
+			}
+			if string(got) != tc.exp {
+				t.Fatalf("expected %v; got %v", tc.exp, string(got))
+			}
+		})
+	}
+}
+
+func TestNodeIDsUnmarshalJSON(t *testing.T) {
+	cmpNodeIDs := func(a, b NodeIDs) bool {
+		if len(a) != len(b) {
+			return false
+		}
+		for i, id := range a {
+			if id != b[i] {
+				return false
+			}
+		}
+		return true
+	}
+
+	testCases := map[string]struct {
+		json string
+		exp  NodeIDs
+	}{
+		"Empty list": {`""`, NodeIDs([]int{})},
+		"One":        {`"123"`, NodeIDs([]int{123})},
+		"Many":       {`"1,2,3"`, NodeIDs([]int{1, 2, 3})},
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			var got NodeIDs
+			if err := json.Unmarshal([]byte(tc.json), &got); err != nil {
+				t.Fatalf("expected nil; got %v", err)
+			}
+			if !cmpNodeIDs(got, tc.exp) {
+				t.Fatalf("expected %v; got %v", tc.exp, got)
+			}
+		})
+	}
+}
 
 func TestLatency(t *testing.T) {
 	ctx := context.Background()
@@ -308,6 +365,7 @@ func TestDoPostRunRequest(t *testing.T) {
 		"With limit":              {RunRequest{Target: "example.com", Limit: 2}, &recordingTransport{}, errDummyTr, `{"target":"example.com","limit":2}`},
 		"With location":           {RunRequest{Target: "example.com", Location: "Asia"}, &recordingTransport{}, errDummyTr, `{"target":"example.com","location":"Asia"}`},
 		"With limit and location": {RunRequest{Target: "example.com", Limit: 2, Location: "Asia"}, &recordingTransport{}, errDummyTr, `{"target":"example.com","location":"Asia","limit":2}`},
+		"With node IDs":           {RunRequest{Target: "example.com", Nodes: NodeIDs([]int{12, 34})}, &recordingTransport{}, errDummyTr, `{"target":"example.com","nodes":"12,34"}`},
 	}
 	ctx := context.Background()
 	for name, tc := range reqTestCases {

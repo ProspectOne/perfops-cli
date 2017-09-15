@@ -27,10 +27,11 @@ type (
 )
 
 // RunTest runs an MTR or ping testm retrives its output and presents it to the user.
-func RunTest(ctx context.Context, target, location string, limit int, debug bool, runTest runFunc, runOutput runOutputFunc) error {
+func RunTest(ctx context.Context, target, location string, nodeIDs []int, limit int, debug bool, runTest runFunc, runOutput runOutputFunc) error {
 	runReq := &perfops.RunRequest{
 		Target:   target,
 		Location: location,
+		Nodes:    nodeIDs,
 		Limit:    limit,
 	}
 

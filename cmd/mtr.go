@@ -33,7 +33,7 @@ var (
 			if err != nil {
 				return err
 			}
-			return chkRunError(runMTR(c, args[0], from, mtrLimit))
+			return chkRunError(runMTR(c, args[0], from, nodeIDs, mtrLimit))
 		},
 	}
 
@@ -45,7 +45,7 @@ func initMTRCmd(parentCmd *cobra.Command) {
 	mtrCmd.Flags().IntVarP(&mtrLimit, "limit", "L", 1, "The maximum number of nodes to use")
 }
 
-func runMTR(c *perfops.Client, target, from string, limit int) error {
+func runMTR(c *perfops.Client, target, from string, nodeIDs []int, limit int) error {
 	ctx := context.Background()
-	return internal.RunTest(ctx, target, from, limit, debug, c.Run.MTR, c.Run.MTROutput)
+	return internal.RunTest(ctx, target, from, nodeIDs, limit, debug, c.Run.MTR, c.Run.MTROutput)
 }

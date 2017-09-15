@@ -36,7 +36,7 @@ var (
 			if err != nil {
 				return err
 			}
-			return chkRunError(runDNSResolve(c, args[0], dnsResolveType, dnsResolveDNSServer, from, dnsResolveLimit))
+			return chkRunError(runDNSResolve(c, args[0], dnsResolveType, dnsResolveDNSServer, from, nodeIDs, dnsResolveLimit))
 		},
 	}
 
@@ -54,13 +54,14 @@ func initDNSResolveCmd(parentCmd *cobra.Command) {
 	dnsResolveCmd.MarkFlagRequired("dns-server")
 }
 
-func runDNSResolve(c *perfops.Client, target, queryType, dnsServer, from string, limit int) error {
+func runDNSResolve(c *perfops.Client, target, queryType, dnsServer, from string, nodeIDs []int, limit int) error {
 	ctx := context.Background()
 	dnsResolveReq := &perfops.DNSResolveRequest{
 		Target:    target,
 		Param:     queryType,
 		DNSServer: dnsServer,
 		Location:  from,
+		Nodes:     nodeIDs,
 		Limit:     limit,
 	}
 

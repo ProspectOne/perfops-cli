@@ -33,7 +33,7 @@ var (
 			if err != nil {
 				return err
 			}
-			return chkRunError(runLatency(c, args[0], from, latencyLimit))
+			return chkRunError(runLatency(c, args[0], from, nodeIDs, latencyLimit))
 		},
 	}
 
@@ -45,7 +45,7 @@ func initLatencyCmd(parentCmd *cobra.Command) {
 	latencyCmd.Flags().IntVarP(&latencyLimit, "limit", "L", 1, "The maximum number of nodes to use")
 }
 
-func runLatency(c *perfops.Client, target, from string, limit int) error {
+func runLatency(c *perfops.Client, target, from string, nodeIDs []int, limit int) error {
 	ctx := context.Background()
-	return internal.RunTest(ctx, target, from, limit, debug, c.Run.Latency, c.Run.LatencyOutput)
+	return internal.RunTest(ctx, target, from, nodeIDs, limit, debug, c.Run.Latency, c.Run.LatencyOutput)
 }

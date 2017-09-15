@@ -61,7 +61,7 @@ func TestRunTest(t *testing.T) {
 	ctx := context.Background()
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
-			err := RunTest(ctx, "target", "location", 1, false, tc.run, tc.output)
+			err := RunTest(ctx, "target", "location", []int{}, 1, false, tc.run, tc.output)
 			if err != tc.err {
 				t.Fatalf("expected %v; got %v", tc.err, err)
 			}
