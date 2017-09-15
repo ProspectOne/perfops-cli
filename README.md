@@ -22,7 +22,7 @@ Available Commands:
   latency     Run a latency test on target, e.g., google.com or 8.8.8.8
   mtr         Run a MTR test on target, e.g., google.com or 8.8.8.8
   ping        Run a ping test on target, e.g., google.com or 8.8.8.8
-  resolve     Resolve a DNS record on target, e.g., google.com or 8.8.8.8
+  resolve     Resolve a DNS record on target, e.g., google.com
   traceroute  Run a traceroute test on target, e.g., google.com or 8.8.8.8
 
 Flags:
