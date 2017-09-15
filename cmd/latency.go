@@ -25,8 +25,8 @@ import (
 var (
 	latencyCmd = &cobra.Command{
 		Use:   "latency [target]",
-		Short: "Run a latency test on target",
-		Long:  `Run a latency test on target.`,
+		Short: "Run a ICMP latency test on a domain name or IP address",
+		Long:  `Run a ICMP latency test on a target, e.g., google.com or 8.8.8.8.`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := newPerfOpsClient()

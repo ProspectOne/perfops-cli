@@ -18,11 +18,11 @@ Usage:
 
 Available Commands:
   help        Help about any command
-  latency     Run a latency test on target
-  mtr         Run a MTR test on target
-  ping        Run a ping test on target
-  resolve     Resolve a DNS record on target
-  traceroute  Run a traceroute test on target
+  latency     Run a latency test on target, e.g., google.com or 8.8.8.8
+  mtr         Run a MTR test on target, e.g., google.com or 8.8.8.8
+  ping        Run a ping test on target, e.g., google.com or 8.8.8.8
+  resolve     Resolve a DNS record on target, e.g., google.com or 8.8.8.8
+  traceroute  Run a traceroute test on target, e.g., google.com or 8.8.8.8
 
 Flags:
       --debug        Enables debug output

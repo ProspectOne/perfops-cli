@@ -28,8 +28,8 @@ import (
 var (
 	dnsResolveCmd = &cobra.Command{
 		Use:   "resolve [target]",
-		Short: "Resolve a DNS record on target",
-		Long:  `Resolve a DNS record on target.`,
+		Short: "Resolve a DNS record on a domain name or IP address",
+		Long:  `Resolve a DNS record on a target, e.g., google.com or 8.8.8.8.`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := newPerfOpsClient()

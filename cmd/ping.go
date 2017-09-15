@@ -25,8 +25,8 @@ import (
 var (
 	pingCmd = &cobra.Command{
 		Use:   "ping [target]",
-		Short: "Run a ping test on target",
-		Long:  `Run a ping test on target.`,
+		Short: "Run a ping test on a domain name or IP address",
+		Long:  `Run a ping test on a target, e.g., google.com or 8.8.8.8.`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := newPerfOpsClient()
