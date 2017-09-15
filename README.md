@@ -17,6 +17,7 @@ Usage:
   perfops [command]
 
 Available Commands:
+  curl        Run a curl test on a domain name or IP address
   help        Help about any command
   latency     Run a latency test on target, e.g., google.com or 8.8.8.8
   mtr         Run a MTR test on target, e.g., google.com or 8.8.8.8

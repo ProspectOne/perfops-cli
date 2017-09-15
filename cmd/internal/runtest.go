@@ -63,7 +63,7 @@ func RunTest(ctx context.Context, target, location string, nodeIDs []int, limit 
 			return err
 		}
 
-		printPartialOutput(output, printedIDs)
+		PrintPartialOutput(output, printedIDs)
 		if output.IsFinished() {
 			break
 		}
@@ -71,7 +71,8 @@ func RunTest(ctx context.Context, target, location string, nodeIDs []int, limit 
 	return nil
 }
 
-func printPartialOutput(output *perfops.RunOutput, printedIDs map[string]bool) {
+// PrintPartialOutput prints run items that have been data.
+func PrintPartialOutput(output *perfops.RunOutput, printedIDs map[string]bool) {
 	for _, item := range output.Items {
 		if printedIDs[item.ID] {
 			continue

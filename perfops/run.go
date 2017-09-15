@@ -102,6 +102,17 @@ type (
 		Items     []*DNSResolveItem `json:"items,omitempty"`
 	}
 
+	// CurlRequest represents the parameters for a curlCURL request.
+	CurlRequest struct {
+		Target   string  `json:"target,omitempty"`
+		Head     bool    `json:"head"`
+		Insecure bool    `json:"insecure,omitempty"`
+		HTTP2    bool    `json:"http2,omitempty"`
+		Nodes    NodeIDs `json:"nodes,omitempty"`
+		Location string  `json:"location,omitempty"`
+		Limit    int     `json:"limit,omitempty"`
+	}
+
 	argError struct {
 		name string
 	}
@@ -241,6 +252,44 @@ func (s *RunService) DNSResolveOutput(ctx context.Context, resolveID TestID) (*D
 	u := s.client.BasePath + "/run/dns-resolve/" + string(resolveID)
 	req, _ := http.NewRequest("GET", u, nil)
 	var v *DNSResolveOutput
+	err := s.client.do(req, &v)
+	return v, err
+}
+
+// Curl runs a curl request.
+func (s *RunService) Curl(ctx context.Context, curl *CurlRequest) (TestID, error) {
+	if !isValidTarget(curl.Target) {
+		return "", &argError{"target"}
+	}
+	if !isValidLimit(s.client.apiKey, curl.Limit) {
+		return "", &argError{"limit"}
+	}
+
+	body, err := newJSONReader(curl)
+	if err != nil {
+		return "", err
+	}
+	u := s.client.BasePath + "/run/curl"
+	req, _ := http.NewRequest("POST", u, body)
+	req = req.WithContext(ctx)
+	var raw struct {
+		Error string
+		ID    string `json:"id"`
+	}
+	if err = s.client.do(req, &raw); err != nil {
+		return "", err
+	}
+	if raw.Error != "" {
+		return "", errors.New(raw.Error)
+	}
+	return TestID(raw.ID), nil
+}
+
+// CurlOutput returns the full curl output under a test ID.
+func (s *RunService) CurlOutput(ctx context.Context, curlID TestID) (*RunOutput, error) {
+	u := s.client.BasePath + "/run/curl/" + string(curlID)
+	req, _ := http.NewRequest("GET", u, nil)
+	var v *RunOutput
 	err := s.client.do(req, &v)
 	return v, err
 }

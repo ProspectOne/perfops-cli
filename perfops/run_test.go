@@ -303,6 +303,92 @@ func TestDNSResolveOutput(t *testing.T) {
 	}
 }
 
+func TestCurl(t *testing.T) {
+	reqTestCases := map[string]struct {
+		curlReq    CurlRequest
+		tr         *recordingTransport
+		expReqBody string
+	}{
+		"Required only": {CurlRequest{Target: "example.com"}, &recordingTransport{}, `{"target":"example.com","head":false}`},
+		"With head":     {CurlRequest{Target: "example.com", Head: true}, &recordingTransport{}, `{"target":"example.com","head":true}`},
+		"With insecure": {CurlRequest{Target: "example.com", Insecure: true}, &recordingTransport{}, `{"target":"example.com","head":false,"insecure":true}`},
+		"With HTTP2":    {CurlRequest{Target: "example.com", HTTP2: true}, &recordingTransport{}, `{"target":"example.com","head":false,"http2":true}`},
+		"With location": {CurlRequest{Target: "example.com", Location: "Asia"}, &recordingTransport{}, `{"target":"example.com","head":false,"location":"Asia"}`},
+	}
+	ctx := context.Background()
+	for name, tc := range reqTestCases {
+		t.Run(name, func(t *testing.T) {
+			c, err := newTestClient(tc.tr)
+			if err != nil {
+				t.Fatalf("unexpected error %v", err)
+			}
+			c.Run.Curl(ctx, &tc.curlReq)
+			if got := reqBody(tc.tr.req); tc.expReqBody != "" && tc.expReqBody != got {
+				t.Fatalf("expected %v; got %v", tc.expReqBody, got)
+			}
+		})
+	}
+
+	testCases := map[string]struct {
+		target   string
+		head     bool
+		insecure bool
+		http2    bool
+		limit    int
+		testID   string
+		tr       *respondingTransport
+		err      error
+	}{
+		"Invalid target": {"meep", true, true, false, 1, "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, &argError{"target"}},
+		"Invalid limit":  {"example.com", true, true, false, freeMaxNodeCap + 1, "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, &argError{"limit"}},
+		"HTTP error":     {"example.com", true, true, false, 1, "", &respondingTransport{resp: dummyResp(400, "POST", `{"Error": "an error"}`)}, errors.New(`400: {"Error": "an error"}`)},
+		"Failed":         {"example.com", true, true, false, 1, "", &respondingTransport{resp: dummyResp(201, "POST", `{"Error": "an error"}`)}, errors.New("an error")},
+		"Created":        {"example.com", true, true, false, 1, "0123456789abcdefghij", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "0123456789abcdefghij"}`)}, nil},
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			c, err := newTestClient(tc.tr)
+			if err != nil {
+				t.Fatalf("unexpected error %v", err)
+			}
+			got, err := c.Run.Curl(ctx, &CurlRequest{Target: tc.target, Head: tc.head, Insecure: tc.insecure, HTTP2: tc.http2, Limit: tc.limit})
+			if !cmpError(err, tc.err) {
+				t.Fatalf("expected %v; got %v", tc.err, err)
+			}
+			if string(got) != tc.testID {
+				t.Fatalf("expected %v; got %v", tc.testID, got)
+			}
+		})
+	}
+}
+
+func TestCurlOutput(t *testing.T) {
+	testCases := map[string]struct {
+		tr       *respondingTransport
+		err      error
+		finished bool
+	}{
+		"Incomplete": {&respondingTransport{resp: dummyResp(200, "GET", `{"id":"d1f2408ff","items":[{"id":"734df82","result":{"id":123,"message":"NO DATA"}}]}`)}, nil, false},
+		"Complete":   {&respondingTransport{resp: dummyResp(200, "GET", `{"id": "9b8253c07b53b2db82b05475f9895f4e","items": [{"id": "99e4a2c3d6c8c7e36681515a2d2978e5","result": {"output": "HTTP/1.1 301 Moved Permanently\nContent-length: 0\nLocation: https://github.com/\n\n","node": {"id": 218,"latitude": 49.09803738740174,"longitude": 12.484245300292855,"country": {"id": 116,"name": "Germany","continent": {"id": 3,"name": "Europe","iso": "EU"},"iso": "DE","iso_numeric": "276"},"city": "Falkenstein","sub_region": "Western Europe"}}}],"requested": "github.com","finished": "true"}`)}, nil, true},
+	}
+	ctx := context.Background()
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			c, err := newTestClient(tc.tr)
+			if err != nil {
+				t.Fatalf("unexpected error %v", err)
+			}
+			got, err := c.Run.CurlOutput(ctx, TestID("1234"))
+			if !cmpError(err, tc.err) {
+				t.Fatalf("expected error %v; got %v", tc.err, err)
+			}
+			if got.IsFinished() != tc.finished {
+				t.Fatalf("expected %v; got %v", tc.finished, got.IsFinished())
+			}
+		})
+	}
+}
+
 func TestIsValidTarget(t *testing.T) {
 	testCases := map[string]struct {
 		t     string
