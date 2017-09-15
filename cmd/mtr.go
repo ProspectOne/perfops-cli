@@ -24,10 +24,11 @@ import (
 
 var (
 	mtrCmd = &cobra.Command{
-		Use:   "mtr [target]",
-		Short: "Run a MTR test on a domain name or IP address",
-		Long:  `Run a MTR test on a target, e.g., google.com or 8.8.8.8.`,
-		Args:  cobra.ExactArgs(1),
+		Use:     "mtr [target]",
+		Short:   "Run a MTR test on a domain name or IP address",
+		Long:    `Run a MTR test on a target, e.g., google.com or 8.8.8.8.`,
+		Example: `perfops mtr --from Germany bing.com`,
+		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := newPerfOpsClient()
 			if err != nil {

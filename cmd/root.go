@@ -40,6 +40,7 @@ var (
 		Use:          "perfops",
 		Short:        "perfops is a tool to interact with the PerfOps API",
 		Long:         `perfops is a tool to interact with the PerfOps API.`,
+		Example:      `perfops traceroute --from "New York" google.com`,
 		SilenceUsage: true,
 		Run: func(cmd *cobra.Command, args []string) {
 			if showVersion {
