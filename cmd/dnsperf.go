@@ -26,10 +26,10 @@ import (
 
 var (
 	dnsPerfCmd = &cobra.Command{
-		Use:     "perf [target]",
+		Use:     "dnsperf [target]",
 		Short:   "Find the time it takes to resolve a DNS record on a target",
 		Long:    `Find the time it takes to resolve a DNS record on a target, e.g., google.com.`,
-		Example: `perfops perf --dns-server 8.8.8.8 bing.com`,
+		Example: `perfops dnsperf --dns-server 8.8.8.8 bing.com`,
 		Args:    requireTarget(),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := newPerfOpsClient()

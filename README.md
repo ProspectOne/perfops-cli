@@ -18,10 +18,10 @@ Usage:
 
 Available Commands:
   curl        Run a curl test on a domain name or IP address
+  dnsperf     Find the time it takes to resolve a DNS record on a target
   help        Help about any command
   latency     Run a ICMP latency test on a domain name or IP address
   mtr         Run a MTR test on a domain name or IP address
-  perf        Find the time it takes to resolve a DNS record on a target
   ping        Run a ping test on a domain name or IP address
   resolve     Resolve a DNS record on a domain name
   traceroute  Run a traceroute test on a domain name or IP address
