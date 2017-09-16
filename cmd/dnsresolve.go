@@ -111,10 +111,7 @@ func printPartialDNSOutput(output *perfops.DNSResolveOutput, printedIDs map[stri
 		n := r.Node
 		if r.Message == "" {
 			printedIDs[item.ID] = true
-			o, ok := r.Output.([]string)
-			if !ok {
-				o = []string{}
-			}
+			o := r.GetOutput()
 			fmt.Printf("Node%d, %s, %s\n%s\n", n.ID, n.City, n.Country.Name, strings.Join(o, "\n"))
 		} else if r.Message != "NO DATA" {
 			printedIDs[item.ID] = true

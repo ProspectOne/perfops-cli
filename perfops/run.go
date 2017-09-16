@@ -16,6 +16,7 @@ package perfops
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net"
@@ -82,10 +83,10 @@ type (
 
 	// DNSResolveResult represents the result of a DNS resolve output.
 	DNSResolveResult struct {
-		DNSServer string      `json:"dnsServer,omitempty"`
-		Node      *Node       `json:"node,omitempty"`
-		Output    interface{} `json:"output,omitempty"`
-		Message   string      `json:"message,omitempty"`
+		DNSServer string          `json:"dnsServer,omitempty"`
+		Node      *Node           `json:"node,omitempty"`
+		Output    json.RawMessage `json:"output,omitempty"`
+		Message   string          `json:"message,omitempty"`
 	}
 
 	// DNSResolveItem respresents an item of a DNS resolve output.
@@ -304,6 +305,15 @@ func (o *RunOutput) IsFinished() bool {
 // complete or not.
 func (o *DNSResolveOutput) IsFinished() bool {
 	return o.Finished == "true"
+}
+
+// GetOutput returns the unmarshalled output.
+func (r *DNSResolveResult) GetOutput() []string {
+	var o []string
+	if err := json.Unmarshal(r.Output, &o); err != nil {
+		o = []string{"-"}
+	}
+	return o
 }
 
 // isValidTarget checks if a string is a valid target, i.e., a public
