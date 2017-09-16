@@ -71,6 +71,15 @@ type (
 		Items     []*RunItem `json:"items,omitempty"`
 	}
 
+	// DNSPerfRequest represents the parameters for a DNS perf request.
+	DNSPerfRequest struct {
+		Target    string  `json:"target,omitempty"`
+		DNSServer string  `json:"dnsServer,omitempty"`
+		Nodes     NodeIDs `json:"nodes,omitempty"`
+		Location  string  `json:"location,omitempty"`
+		Limit     int     `json:"limit,omitempty"`
+	}
+
 	// DNSResolveRequest represents the parameters for a DNS resolve request.
 	DNSResolveRequest struct {
 		Target    string  `json:"target,omitempty"`
@@ -81,29 +90,29 @@ type (
 		Limit     int     `json:"limit,omitempty"`
 	}
 
-	// DNSResolveResult represents the result of a DNS resolve output.
-	DNSResolveResult struct {
+	// DNSTestResult represents the result of a DNS perf and DNS resolve output.
+	DNSTestResult struct {
 		DNSServer string          `json:"dnsServer,omitempty"`
 		Node      *Node           `json:"node,omitempty"`
 		Output    json.RawMessage `json:"output,omitempty"`
 		Message   string          `json:"message,omitempty"`
 	}
 
-	// DNSResolveItem respresents an item of a DNS resolve output.
-	DNSResolveItem struct {
-		ID     string            `json:"id,omitempty"`
-		Result *DNSResolveResult `json:"result,omitempty"`
+	// DNSTestItem respresents an item of a DNS perf and DNS resolve output.
+	DNSTestItem struct {
+		ID     string         `json:"id,omitempty"`
+		Result *DNSTestResult `json:"result,omitempty"`
 	}
 
-	// DNSResolveOutput represents the response of a DNS resolve output call.
-	DNSResolveOutput struct {
-		ID        string            `json:"id,omitempty"`
-		Requested string            `json:"requested,omitempty"`
-		Finished  string            `json:"finished"`
-		Items     []*DNSResolveItem `json:"items,omitempty"`
+	// DNSTestOutput represents the response of a DNS perf and DNS resolve output call.
+	DNSTestOutput struct {
+		ID        string         `json:"id,omitempty"`
+		Requested string         `json:"requested,omitempty"`
+		Finished  string         `json:"finished"`
+		Items     []*DNSTestItem `json:"items,omitempty"`
 	}
 
-	// CurlRequest represents the parameters for a curlCURL request.
+	// CurlRequest represents the parameters for a curl request.
 	CurlRequest struct {
 		Target   string  `json:"target,omitempty"`
 		Head     bool    `json:"head"`
@@ -213,6 +222,47 @@ func (s *RunService) TracerouteOutput(ctx context.Context, pingID TestID) (*RunO
 	return s.doGetRunOutput(ctx, "/run/traceroute/", pingID)
 }
 
+// DNSPerf finds the time it takes to resolve a DNS record.
+func (s *RunService) DNSPerf(ctx context.Context, perf *DNSPerfRequest) (TestID, error) {
+	if !isValidTarget(perf.Target) {
+		return "", &argError{"target"}
+	}
+	if ip := net.ParseIP(perf.DNSServer); ip == nil {
+		return "", &argError{"dns server"}
+	}
+	if !isValidLimit(s.client.apiKey, perf.Limit) {
+		return "", &argError{"limit"}
+	}
+
+	body, err := newJSONReader(perf)
+	if err != nil {
+		return "", err
+	}
+	u := s.client.BasePath + "/run/dns-perf"
+	req, _ := http.NewRequest("POST", u, body)
+	req = req.WithContext(ctx)
+	var raw struct {
+		Error string
+		ID    string `json:"id"`
+	}
+	if err = s.client.do(req, &raw); err != nil {
+		return "", err
+	}
+	if raw.Error != "" {
+		return "", errors.New(raw.Error)
+	}
+	return TestID(raw.ID), nil
+}
+
+// DNSPerfOutput returns the full DNS perf output under a test ID.
+func (s *RunService) DNSPerfOutput(ctx context.Context, perfID TestID) (*DNSTestOutput, error) {
+	u := s.client.BasePath + "/run/dns-perf/" + string(perfID)
+	req, _ := http.NewRequest("GET", u, nil)
+	var v *DNSTestOutput
+	err := s.client.do(req, &v)
+	return v, err
+}
+
 // DNSResolve resolves a DNS record.
 func (s *RunService) DNSResolve(ctx context.Context, resolve *DNSResolveRequest) (TestID, error) {
 	if !isValidTarget(resolve.Target) {
@@ -249,10 +299,10 @@ func (s *RunService) DNSResolve(ctx context.Context, resolve *DNSResolveRequest)
 }
 
 // DNSResolveOutput returns the full DNS resolve output under a test ID.
-func (s *RunService) DNSResolveOutput(ctx context.Context, resolveID TestID) (*DNSResolveOutput, error) {
+func (s *RunService) DNSResolveOutput(ctx context.Context, resolveID TestID) (*DNSTestOutput, error) {
 	u := s.client.BasePath + "/run/dns-resolve/" + string(resolveID)
 	req, _ := http.NewRequest("GET", u, nil)
-	var v *DNSResolveOutput
+	var v *DNSTestOutput
 	err := s.client.do(req, &v)
 	return v, err
 }
@@ -303,12 +353,21 @@ func (o *RunOutput) IsFinished() bool {
 
 // IsFinished returns a value indicating whether the whole output is
 // complete or not.
-func (o *DNSResolveOutput) IsFinished() bool {
+func (o *DNSTestOutput) IsFinished() bool {
 	return o.Finished == "true"
 }
 
-// GetOutput returns the unmarshalled output.
-func (r *DNSResolveResult) GetOutput() []string {
+// PerfOutput returns the unmarshalled output for DNS perf requests.
+func (r *DNSTestResult) PerfOutput() string {
+	var o string
+	if err := json.Unmarshal(r.Output, &o); err != nil {
+		o = "-"
+	}
+	return o
+}
+
+// ResolveOutput returns the unmarshalled output for DNS resolve requests.
+func (r *DNSTestResult) ResolveOutput() []string {
 	var o []string
 	if err := json.Unmarshal(r.Output, &o); err != nil {
 		o = []string{"-"}

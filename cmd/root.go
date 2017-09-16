@@ -74,6 +74,7 @@ func Execute() error {
 	initMTRCmd(rootCmd)
 	initPingCmd(rootCmd)
 	initTracerouteCmd(rootCmd)
+	initDNSPerfCmd(rootCmd)
 	initDNSResolveCmd(rootCmd)
 	initCurlCmd(rootCmd)
 	return rootCmd.Execute()

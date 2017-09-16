@@ -80,7 +80,7 @@ func runDNSResolve(c *perfops.Client, target, queryType, dnsServer, from string,
 		fmt.Printf("Test ID: %v\n", testID)
 	}
 
-	var output *perfops.DNSResolveOutput
+	var output *perfops.DNSTestOutput
 	printedIDs := map[string]bool{}
 	for {
 		spinner.Start()
@@ -94,7 +94,10 @@ func runDNSResolve(c *perfops.Client, target, queryType, dnsServer, from string,
 			return err
 		}
 
-		printPartialDNSOutput(output, printedIDs)
+		printPartialDNSOutput(output, printedIDs, func(r *perfops.DNSTestResult) string {
+			o := r.ResolveOutput()
+			return strings.Join(o, "\n")
+		})
 		if output.IsFinished() {
 			break
 		}
@@ -102,7 +105,7 @@ func runDNSResolve(c *perfops.Client, target, queryType, dnsServer, from string,
 	return nil
 }
 
-func printPartialDNSOutput(output *perfops.DNSResolveOutput, printedIDs map[string]bool) {
+func printPartialDNSOutput(output *perfops.DNSTestOutput, printedIDs map[string]bool, getOutput func(r *perfops.DNSTestResult) string) {
 	for _, item := range output.Items {
 		if printedIDs[item.ID] {
 			continue
@@ -111,8 +114,8 @@ func printPartialDNSOutput(output *perfops.DNSResolveOutput, printedIDs map[stri
 		n := r.Node
 		if r.Message == "" {
 			printedIDs[item.ID] = true
-			o := r.GetOutput()
-			fmt.Printf("Node%d, %s, %s\n%s\n", n.ID, n.City, n.Country.Name, strings.Join(o, "\n"))
+			o := getOutput(r)
+			fmt.Printf("Node%d, %s, %s\n%s\n", n.ID, n.City, n.Country.Name, o)
 		} else if r.Message != "NO DATA" {
 			printedIDs[item.ID] = true
 			fmt.Printf("Node%d, %s, %s\n%s\n", n.ID, n.City, n.Country.Name, r.Message)

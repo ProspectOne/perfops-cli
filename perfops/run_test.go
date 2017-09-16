@@ -218,6 +218,89 @@ func TestTracerouteOutput(t *testing.T) {
 	}
 }
 
+func TestDNSPerf(t *testing.T) {
+	reqTestCases := map[string]struct {
+		dnsPerfReq DNSPerfRequest
+		tr         *recordingTransport
+		expReqBody string
+	}{
+		"Required only": {DNSPerfRequest{Target: "example.com", DNSServer: "127.0.0.1"}, &recordingTransport{}, `{"target":"example.com","dnsServer":"127.0.0.1"}`},
+		"With location": {DNSPerfRequest{Target: "example.com", DNSServer: "127.0.0.1", Location: "Asia"}, &recordingTransport{}, `{"target":"example.com","dnsServer":"127.0.0.1","location":"Asia"}`},
+	}
+	ctx := context.Background()
+	for name, tc := range reqTestCases {
+		t.Run(name, func(t *testing.T) {
+			c, err := newTestClient(tc.tr)
+			if err != nil {
+				t.Fatalf("unexpected error %v", err)
+			}
+			c.Run.DNSPerf(ctx, &tc.dnsPerfReq)
+			if got := reqBody(tc.tr.req); tc.expReqBody != "" && tc.expReqBody != got {
+				t.Fatalf("expected %v; got %v", tc.expReqBody, got)
+			}
+		})
+	}
+
+	testCases := map[string]struct {
+		target    string
+		dnsServer string
+		limit     int
+		testID    string
+		tr        *respondingTransport
+		err       error
+	}{
+		"Invalid target":     {"meep", "127.0.0.1", 1, "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, &argError{"target"}},
+		"Missing DNS server": {"example.com", "", 1, "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, &argError{"dns server"}},
+		"Invalid DNS server": {"example.com", "127.0", 1, "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, &argError{"dns server"}},
+		"Invalid limit":      {"example.com", "127.0.0.1", freeMaxNodeCap + 1, "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, &argError{"limit"}},
+		"HTTP error":         {"example.com", "127.0.0.1", 1, "", &respondingTransport{resp: dummyResp(400, "POST", `{"Error": "an error"}`)}, errors.New(`400: {"Error": "an error"}`)},
+		"Failed":             {"example.com", "127.0.0.1", 1, "", &respondingTransport{resp: dummyResp(201, "POST", `{"Error": "an error"}`)}, errors.New("an error")},
+		"Created":            {"example.com", "127.0.0.1", 1, "0123456789abcdefghij", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "0123456789abcdefghij"}`)}, nil},
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			c, err := newTestClient(tc.tr)
+			if err != nil {
+				t.Fatalf("unexpected error %v", err)
+			}
+			got, err := c.Run.DNSPerf(ctx, &DNSPerfRequest{Target: tc.target, DNSServer: tc.dnsServer, Limit: tc.limit})
+			if !cmpError(err, tc.err) {
+				t.Fatalf("expected %v; got %v", tc.err, err)
+			}
+			if string(got) != tc.testID {
+				t.Fatalf("expected %v; got %v", tc.testID, got)
+			}
+		})
+	}
+}
+
+func TestDNSPerfOutput(t *testing.T) {
+	testCases := map[string]struct {
+		tr       *respondingTransport
+		err      error
+		finished bool
+	}{
+		"Incomplete": {&respondingTransport{resp: dummyResp(200, "GET", `{"id":"d1f2408ff","items":[{"id":"734df82","result":{"id":123,"message":"NO DATA"}}]}`)}, nil, false},
+		"Complete":   {&respondingTransport{resp: dummyResp(200, "GET", `{"id": "6938330049d86df74bb2d0c76f3479de","items": [{"id": "68d10bfb6a9c7f9c519d17df83bc389e","result": {"dnsServer": "8.8.8.8","output": "35","node": {"id": 5,"latitude": 50.110781326572834,"longitude": 8.68984222412098,"country": {"id": 116,"name": "Germany","continent": {"id": 3,"name": "Europe","iso": "EU"},"iso": "DE","iso_numeric": "276"},"city": "Frankfurt","sub_region": "Western Europe"}}}],"requested": "google.com","finished": "true"}`)}, nil, true},
+	}
+	ctx := context.Background()
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			c, err := newTestClient(tc.tr)
+			if err != nil {
+				t.Fatalf("unexpected error %v", err)
+			}
+			got, err := c.Run.DNSPerfOutput(ctx, TestID("1234"))
+			if !cmpError(err, tc.err) {
+				t.Fatalf("expected error %v; got %v", tc.err, err)
+			}
+			if got.IsFinished() != tc.finished {
+				t.Fatalf("expected %v; got %v", tc.finished, got.IsFinished())
+			}
+		})
+	}
+}
+
 func TestDNSResolve(t *testing.T) {
 	reqTestCases := map[string]struct {
 		dnsResolveReq DNSResolveRequest
@@ -384,6 +467,60 @@ func TestCurlOutput(t *testing.T) {
 			}
 			if got.IsFinished() != tc.finished {
 				t.Fatalf("expected %v; got %v", tc.finished, got.IsFinished())
+			}
+		})
+	}
+}
+
+func TestPerfOuput(t *testing.T) {
+	testCases := map[string]struct {
+		data string
+		exp  string
+	}{
+		"Invalid": {"{}", "-"},
+		"Valid":   {`{"dnsServer": "8.8.8.8","output": "35","node": {"id": 5,"latitude": 50.110781326572834,"longitude": 8.68984222412098,"country": {"id": 116,"name": "Germany","continent": {"id": 3,"name": "Europe","iso": "EU"},"iso": "DE","iso_numeric": "276"},"city": "Frankfurt","sub_region": "Western Europe"}}`, "35"},
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			var r *DNSTestResult
+			if err := json.Unmarshal([]byte(tc.data), &r); err != nil {
+				t.Fatalf("unexpected error %v", err)
+			}
+			if got, exp := r.PerfOutput(), tc.exp; got != exp {
+				t.Fatalf("expected %v; got %v", exp, got)
+			}
+		})
+	}
+}
+
+func TestResolveOuput(t *testing.T) {
+	cmpSlices := func(a, b []string) bool {
+		if len(a) != len(b) {
+			return false
+		}
+		for i, v := range a {
+			if v != b[i] {
+				return false
+			}
+		}
+		return true
+	}
+
+	testCases := map[string]struct {
+		data string
+		exp  []string
+	}{
+		"Invalid": {"{}", []string{"-"}},
+		"Valid":   {`{"dnsServer": "8.8.8.8","output": ["204.79.197.200", "13.107.21.200"],"node": {"id": 5,"latitude": 50.110781326572834,"longitude": 8.68984222412098,"country": {"id": 116,"name": "Germany","continent": {"id": 3,"name": "Europe","iso": "EU"},"iso": "DE","iso_numeric": "276"},"city": "Frankfurt","sub_region": "Western Europe"}}`, []string{"204.79.197.200", "13.107.21.200"}},
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			var r *DNSTestResult
+			if err := json.Unmarshal([]byte(tc.data), &r); err != nil {
+				t.Fatalf("unexpected error %v", err)
+			}
+			if got, exp := r.ResolveOutput(), tc.exp; !cmpSlices(got, exp) {
+				t.Fatalf("expected %v; got %v", exp, got)
 			}
 		})
 	}
