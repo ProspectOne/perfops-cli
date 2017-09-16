@@ -31,7 +31,7 @@ var (
 		Short:   "Resolve a DNS record on a domain name",
 		Long:    `Resolve a DNS record on a target, e.g., google.com.`,
 		Example: `perfops resolve --dns-server 8.8.8.8 --type A bing.com`,
-		Args:    cobra.ExactArgs(1),
+		Args:    requireTarget(),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := newPerfOpsClient()
 			if err != nil {

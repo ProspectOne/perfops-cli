@@ -103,6 +103,16 @@ func initConfig() {
 	}
 }
 
+// requireTarget returns an error if no target is specified.
+func requireTarget() cobra.PositionalArgs {
+	return func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			return errors.New("no target specified")
+		}
+		return nil
+	}
+}
+
 func chkRunError(err error) error {
 	type argNamer interface {
 		ArgName() string
