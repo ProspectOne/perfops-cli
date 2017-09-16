@@ -38,8 +38,8 @@ var (
 	// rootCmd is the root command of the application.
 	rootCmd = &cobra.Command{
 		Use:          "perfops",
-		Short:        "perfops is a tool to interact with the PerfOps API",
-		Long:         `perfops is a tool to interact with the PerfOps API.`,
+		Short:        "perfops is a simple command line tool to interact with hunderds of servers around the world.",
+		Long:         `perfops is a simple command line tool to interact with hunderds of servers around the world. Run benchmarks and debug your infrastructure without leaving your console.`,
 		Example:      `perfops traceroute --from "New York" google.com`,
 		SilenceUsage: true,
 		Run: func(cmd *cobra.Command, args []string) {
