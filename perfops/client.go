@@ -1,4 +1,4 @@
-// Copyright 2017 The PerfOps-CLI Authors. All rights reserved.
+// Copyright 2017 Prospect One https://prospectone.io/. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -143,7 +143,6 @@ func (c *Client) do(req *http.Request, v interface{}) error {
 		if err != nil {
 			return err
 		}
-		//fmt.Printf("***\n%v\n***\n", string(b))
 		return &clientError{Code: resp.StatusCode, Text: string(b)}
 	}
 	d := json.NewDecoder(resp.Body)
