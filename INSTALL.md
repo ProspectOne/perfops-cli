@@ -14,6 +14,14 @@ curl -s https://packagecloud.io/install/repositories/p1/perfops/script.rpm.sh | 
 yum install perfops
 ```
 
+### MacOS
+
+```
+brew tap ProspectOne/perfops
+brew install perfops
+perfops --help
+```
+
 ## Manual
 
 ### deb
