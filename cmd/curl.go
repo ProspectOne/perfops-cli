@@ -48,7 +48,7 @@ var (
 
 func initCurlCmd(parentCmd *cobra.Command) {
 	parentCmd.AddCommand(curlCmd)
-	curlCmd.Flags().BoolVarP(&curlHead, "head", "I", true, "Fetch the headers only")
+	curlCmd.Flags().BoolVarP(&curlHead, "head", "I", false, "Fetch the headers only")
 	curlCmd.Flags().BoolVarP(&curlInsecure, "insecure", "k", false, "Allow curl to proceed for server connections considered insecure")
 	curlCmd.Flags().BoolVarP(&curlHTTP2, "http2", "", false, "Use HTTP version 2")
 	curlCmd.Flags().IntVarP(&curlLimit, "limit", "L", 1, "The maximum number of nodes to use")

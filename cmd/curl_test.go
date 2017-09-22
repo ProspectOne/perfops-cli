@@ -24,7 +24,7 @@ func TestInitCurlCmd(t *testing.T) {
 		args   []string
 		gotexp func() (interface{}, interface{})
 	}{
-		"head":     {[]string{"--head=false"}, func() (interface{}, interface{}) { return curlHead, false }},
+		"head":     {[]string{"--head"}, func() (interface{}, interface{}) { return curlHead, true }},
 		"insecure": {[]string{"--insecure"}, func() (interface{}, interface{}) { return curlInsecure, true }},
 		"http2":    {[]string{"--http2"}, func() (interface{}, interface{}) { return curlHTTP2, true }},
 		"limit":    {[]string{"--limit", "23"}, func() (interface{}, interface{}) { return curlLimit, 23 }},
