@@ -20,14 +20,30 @@ import (
 )
 
 func TestInitDNSPerfCmd(t *testing.T) {
+	testCases := map[string]struct {
+		args []string
+		exp  func() (interface{}, interface{})
+	}{
+		"dns-server": {[]string{"--dns-server", "123.234.0.1"}, func() (interface{}, interface{}) { return dnsPerfDNSServer, "123.234.0.1" }},
+		"limit":      {[]string{"--limit", "23"}, func() (interface{}, interface{}) { return dnsPerfLimit, 23 }},
+	}
 	parent := &cobra.Command{}
-	dnsPerfCmd.ResetFlags()
-	initDNSPerfCmd(parent)
-
-	flags := dnsPerfCmd.Flags()
-
-	if got := flags.Lookup("dns-server"); got == nil {
-		t.Fatal("expected dns-server flag; got nil")
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			dnsPerfCmd.ResetFlags()
+			initDNSPerfCmd(parent)
+			if err := dnsPerfCmd.ParseFlags(tc.args); err != nil {
+				t.Fatalf("exepected nil; got %v", err)
+			}
+			flags := dnsPerfCmd.Flags()
+			f := flags.Lookup(name)
+			if f == nil {
+				t.Fatal("expected flag; got nil")
+			}
+			if got, exp := tc.exp(); got != exp {
+				t.Fatalf("expected %v; got %v", exp, got)
+			}
+		})
 	}
 }
 

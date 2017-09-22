@@ -20,13 +20,29 @@ import (
 )
 
 func TestInitTracerouteCmd(t *testing.T) {
+	testCases := map[string]struct {
+		args []string
+		exp  func() (interface{}, interface{})
+	}{
+		"limit": {[]string{"--limit", "23"}, func() (interface{}, interface{}) { return tracerouteLimit, 23 }},
+	}
 	parent := &cobra.Command{}
-	initTracerouteCmd(parent)
-
-	flags := tracerouteCmd.Flags()
-
-	if got := flags.Lookup("limit"); got == nil {
-		t.Fatal("expected limit flag; got nil")
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			tracerouteCmd.ResetFlags()
+			initTracerouteCmd(parent)
+			if err := tracerouteCmd.ParseFlags(tc.args); err != nil {
+				t.Fatalf("exepected nil; got %v", err)
+			}
+			flags := tracerouteCmd.Flags()
+			f := flags.Lookup(name)
+			if f == nil {
+				t.Fatal("expected flag; got nil")
+			}
+			if got, exp := tc.exp(); got != exp {
+				t.Fatalf("expected %v; got %v", exp, got)
+			}
+		})
 	}
 }
 

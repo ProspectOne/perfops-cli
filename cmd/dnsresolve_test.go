@@ -20,17 +20,31 @@ import (
 )
 
 func TestInitDNSResolveCmd(t *testing.T) {
-	parent := &cobra.Command{}
-	dnsResolveCmd.ResetFlags()
-	initDNSResolveCmd(parent)
-
-	flags := dnsResolveCmd.Flags()
-
-	if got := flags.Lookup("type"); got == nil {
-		t.Fatal("expected type flag; got nil")
+	testCases := map[string]struct {
+		args []string
+		exp  func() (interface{}, interface{})
+	}{
+		"type":       {[]string{"--type", "TXT"}, func() (interface{}, interface{}) { return dnsResolveType, "TXT" }},
+		"dns-server": {[]string{"--dns-server", "123.234.0.1"}, func() (interface{}, interface{}) { return dnsResolveDNSServer, "123.234.0.1" }},
+		"limit":      {[]string{"--limit", "23"}, func() (interface{}, interface{}) { return dnsPerfLimit, 23 }},
 	}
-	if got := flags.Lookup("dns-server"); got == nil {
-		t.Fatal("expected dns-server flag; got nil")
+	parent := &cobra.Command{}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			dnsResolveCmd.ResetFlags()
+			initDNSResolveCmd(parent)
+			if err := dnsResolveCmd.ParseFlags(tc.args); err != nil {
+				t.Fatalf("exepected nil; got %v", err)
+			}
+			flags := dnsResolveCmd.Flags()
+			f := flags.Lookup(name)
+			if f == nil {
+				t.Fatal("expected flag; got nil")
+			}
+			if got, exp := tc.exp(); got != exp {
+				t.Fatalf("expected %v; got %v", exp, got)
+			}
+		})
 	}
 }
 
