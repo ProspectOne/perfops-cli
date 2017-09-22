@@ -19,21 +19,33 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func TestInitCUrlCmd(t *testing.T) {
+func TestInitCurlCmd(t *testing.T) {
+	testCases := map[string]struct {
+		args []string
+		exp  func() (interface{}, interface{})
+	}{
+		"head":     {[]string{"--head", "false"}, func() (interface{}, interface{}) { return curlHead, true }},
+		"insecure": {[]string{"--insecure"}, func() (interface{}, interface{}) { return curlInsecure, true }},
+		"http2":    {[]string{"--http2"}, func() (interface{}, interface{}) { return curlHTTP2, true }},
+		"limit":    {[]string{"--limit", "23"}, func() (interface{}, interface{}) { return curlLimit, 23 }},
+	}
 	parent := &cobra.Command{}
-	curlCmd.ResetFlags()
-	initCurlCmd(parent)
-
-	flags := curlCmd.Flags()
-
-	if got := flags.Lookup("head"); got == nil {
-		t.Fatal("expected head flag; got nil")
-	}
-	if got := flags.Lookup("insecure"); got == nil {
-		t.Fatal("expected insecure flag; got nil")
-	}
-	if got := flags.Lookup("http2"); got == nil {
-		t.Fatal("expected http2 flag; got nil")
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			curlCmd.ResetFlags()
+			initCurlCmd(parent)
+			if err := curlCmd.ParseFlags(tc.args); err != nil {
+				t.Fatalf("exepected nil; got %v", err)
+			}
+			flags := curlCmd.Flags()
+			f := flags.Lookup(name)
+			if f == nil {
+				t.Fatal("expected flag; got nil")
+			}
+			if got, exp := tc.exp(); got != exp {
+				t.Fatalf("expected %v; got %v", exp, got)
+			}
+		})
 	}
 }
 

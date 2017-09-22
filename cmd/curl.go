@@ -51,7 +51,7 @@ func initCurlCmd(parentCmd *cobra.Command) {
 	curlCmd.Flags().BoolVarP(&curlHead, "head", "I", true, "Fetch the headers only")
 	curlCmd.Flags().BoolVarP(&curlInsecure, "insecure", "k", false, "Allow curl to proceed for server connections considered insecure")
 	curlCmd.Flags().BoolVarP(&curlHTTP2, "http2", "", false, "Use HTTP version 2")
-	curlCmd.Flags().IntVarP(&dnsResolveLimit, "limit", "L", 1, "The maximum number of nodes to use")
+	curlCmd.Flags().IntVarP(&curlLimit, "limit", "L", 1, "The maximum number of nodes to use")
 }
 
 func runCurl(c *perfops.Client, target string, head, insecure, http2 bool, from string, nodeIDs []int, limit int) error {
