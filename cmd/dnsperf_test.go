@@ -21,8 +21,8 @@ import (
 
 func TestInitDNSPerfCmd(t *testing.T) {
 	testCases := map[string]struct {
-		args []string
-		exp  func() (interface{}, interface{})
+		args   []string
+		gotexp func() (interface{}, interface{})
 	}{
 		"dns-server": {[]string{"--dns-server", "123.234.0.1"}, func() (interface{}, interface{}) { return dnsPerfDNSServer, "123.234.0.1" }},
 		"limit":      {[]string{"--limit", "23"}, func() (interface{}, interface{}) { return dnsPerfLimit, 23 }},
@@ -40,7 +40,7 @@ func TestInitDNSPerfCmd(t *testing.T) {
 			if f == nil {
 				t.Fatal("expected flag; got nil")
 			}
-			if got, exp := tc.exp(); got != exp {
+			if got, exp := tc.gotexp(); got != exp {
 				t.Fatalf("expected %v; got %v", exp, got)
 			}
 		})

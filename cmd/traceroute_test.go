@@ -21,8 +21,8 @@ import (
 
 func TestInitTracerouteCmd(t *testing.T) {
 	testCases := map[string]struct {
-		args []string
-		exp  func() (interface{}, interface{})
+		args   []string
+		gotexp func() (interface{}, interface{})
 	}{
 		"limit": {[]string{"--limit", "23"}, func() (interface{}, interface{}) { return tracerouteLimit, 23 }},
 	}
@@ -39,7 +39,7 @@ func TestInitTracerouteCmd(t *testing.T) {
 			if f == nil {
 				t.Fatal("expected flag; got nil")
 			}
-			if got, exp := tc.exp(); got != exp {
+			if got, exp := tc.gotexp(); got != exp {
 				t.Fatalf("expected %v; got %v", exp, got)
 			}
 		})

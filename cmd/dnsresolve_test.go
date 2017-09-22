@@ -21,8 +21,8 @@ import (
 
 func TestInitDNSResolveCmd(t *testing.T) {
 	testCases := map[string]struct {
-		args []string
-		exp  func() (interface{}, interface{})
+		args   []string
+		gotexp func() (interface{}, interface{})
 	}{
 		"type":       {[]string{"--type", "TXT"}, func() (interface{}, interface{}) { return dnsResolveType, "TXT" }},
 		"dns-server": {[]string{"--dns-server", "123.234.0.1"}, func() (interface{}, interface{}) { return dnsResolveDNSServer, "123.234.0.1" }},
@@ -41,7 +41,7 @@ func TestInitDNSResolveCmd(t *testing.T) {
 			if f == nil {
 				t.Fatal("expected flag; got nil")
 			}
-			if got, exp := tc.exp(); got != exp {
+			if got, exp := tc.gotexp(); got != exp {
 				t.Fatalf("expected %v; got %v", exp, got)
 			}
 		})

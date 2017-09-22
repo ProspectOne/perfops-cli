@@ -21,10 +21,10 @@ import (
 
 func TestInitCurlCmd(t *testing.T) {
 	testCases := map[string]struct {
-		args []string
-		exp  func() (interface{}, interface{})
+		args   []string
+		gotexp func() (interface{}, interface{})
 	}{
-		"head":     {[]string{"--head", "false"}, func() (interface{}, interface{}) { return curlHead, true }},
+		"head":     {[]string{"--head=false"}, func() (interface{}, interface{}) { return curlHead, false }},
 		"insecure": {[]string{"--insecure"}, func() (interface{}, interface{}) { return curlInsecure, true }},
 		"http2":    {[]string{"--http2"}, func() (interface{}, interface{}) { return curlHTTP2, true }},
 		"limit":    {[]string{"--limit", "23"}, func() (interface{}, interface{}) { return curlLimit, 23 }},
@@ -42,7 +42,7 @@ func TestInitCurlCmd(t *testing.T) {
 			if f == nil {
 				t.Fatal("expected flag; got nil")
 			}
-			if got, exp := tc.exp(); got != exp {
+			if got, exp := tc.gotexp(); got != exp {
 				t.Fatalf("expected %v; got %v", exp, got)
 			}
 		})
