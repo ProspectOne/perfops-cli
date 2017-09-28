@@ -227,7 +227,7 @@ func (s *RunService) DNSPerf(ctx context.Context, perf *DNSPerfRequest) (TestID,
 	if !isValidTarget(perf.Target) {
 		return "", &argError{"target"}
 	}
-	if ip := net.ParseIP(perf.DNSServer); ip == nil {
+	if !isValidTarget(perf.DNSServer) {
 		return "", &argError{"dns server"}
 	}
 	if !isValidLimit(s.client.apiKey, perf.Limit) {
@@ -271,7 +271,7 @@ func (s *RunService) DNSResolve(ctx context.Context, resolve *DNSResolveRequest)
 	if resolve.Param == "" {
 		return "", &argError{"param"}
 	}
-	if ip := net.ParseIP(resolve.DNSServer); ip == nil {
+	if !isValidTarget(resolve.DNSServer) {
 		return "", &argError{"dns server"}
 	}
 	if !isValidLimit(s.client.apiKey, resolve.Limit) {
@@ -386,7 +386,14 @@ func isValidTarget(s string) bool {
 	}
 	// Assume domain name and require at least one level above TLD
 	i := strings.LastIndex(s, ".")
-	return i > 0 && len(s)-i > 1
+	if i == -1 || len(s)-1 == i {
+		return false
+	}
+	// TLD may not start with a number
+	if c := s[i+1]; c >= '0' && c <= '9' {
+		return false
+	}
+	return true
 }
 
 // isValidLimit retruns a value indicating whether the limit is valid,

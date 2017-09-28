@@ -533,7 +533,10 @@ func TestIsValidTarget(t *testing.T) {
 	}{
 		"Empty target":     {"", false},
 		"Invalid hostname": {"meep", false},
+		"No TLD":           {"meep.", false},
+		"Invalid TLD":      {"meep.123", false},
 		"Valid hostname":   {"meep.com", true},
+		"Invalid IPv4":     {"123.644.123.123", false},
 		"Valid IPv4":       {"123.123.123.123", true},
 		"Invalid IPv6":     {"123:123", false},
 		"Valid IPv6":       {"2001:db8::68", true},
