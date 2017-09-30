@@ -76,7 +76,7 @@ func runDNSResolve(c *perfops.Client, target, queryType, dnsServer, from string,
 		return err
 	}
 
-	if debug {
+	if debug && !outputJSON {
 		fmt.Printf("Test ID: %v\n", testID)
 	}
 
@@ -94,13 +94,18 @@ func runDNSResolve(c *perfops.Client, target, queryType, dnsServer, from string,
 			return err
 		}
 
-		printPartialDNSOutput(output, printedIDs, func(r *perfops.DNSTestResult) string {
-			o := r.ResolveOutput()
-			return strings.Join(o, "\n")
-		})
+		if !outputJSON {
+			printPartialDNSOutput(output, printedIDs, func(r *perfops.DNSTestResult) string {
+				o := r.ResolveOutput()
+				return strings.Join(o, "\n")
+			})
+		}
 		if output.IsFinished() {
 			break
 		}
+	}
+	if outputJSON {
+		internal.PrintOutputJSON(output)
 	}
 	return nil
 }

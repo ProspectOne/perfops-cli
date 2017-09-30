@@ -15,6 +15,7 @@ package internal
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -27,7 +28,7 @@ type (
 )
 
 // RunTest runs an MTR or ping testm retrives its output and presents it to the user.
-func RunTest(ctx context.Context, target, location string, nodeIDs []int, limit int, debug bool, runTest runFunc, runOutput runOutputFunc) error {
+func RunTest(ctx context.Context, target, location string, nodeIDs []int, limit int, debug, outputJSON bool, runTest runFunc, runOutput runOutputFunc) error {
 	runReq := &perfops.RunRequest{
 		Target:   target,
 		Location: location,
@@ -45,7 +46,7 @@ func RunTest(ctx context.Context, target, location string, nodeIDs []int, limit 
 		return err
 	}
 
-	if debug {
+	if debug && !outputJSON {
 		fmt.Printf("Test ID: %v\n", testID)
 	}
 
@@ -63,10 +64,15 @@ func RunTest(ctx context.Context, target, location string, nodeIDs []int, limit 
 			return err
 		}
 
-		PrintPartialOutput(output, printedIDs)
+		if !outputJSON {
+			PrintPartialOutput(output, printedIDs)
+		}
 		if output.IsFinished() {
 			break
 		}
+	}
+	if outputJSON {
+		PrintOutputJSON(output)
 	}
 	return nil
 }
@@ -87,4 +93,14 @@ func PrintPartialOutput(output *perfops.RunOutput, printedIDs map[string]bool) {
 			fmt.Printf("Node%d, %s, %s\n%s\n", n.ID, n.City, n.Country.Name, r.Message)
 		}
 	}
+}
+
+// PrintOutputJSON marshals the output into JSON and prints the JSON.
+func PrintOutputJSON(output interface{}) error {
+	b, err := json.Marshal(output)
+	if err != nil {
+		return err
+	}
+	fmt.Println(string(b))
+	return nil
 }

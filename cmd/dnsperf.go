@@ -71,7 +71,7 @@ func runDNSPerf(c *perfops.Client, target, dnsServer, from string, nodeIDs []int
 		return err
 	}
 
-	if debug {
+	if debug && !outputJSON {
 		fmt.Printf("Test ID: %v\n", testID)
 	}
 
@@ -89,12 +89,17 @@ func runDNSPerf(c *perfops.Client, target, dnsServer, from string, nodeIDs []int
 			return err
 		}
 
-		printPartialDNSOutput(output, printedIDs, func(r *perfops.DNSTestResult) string {
-			return r.PerfOutput()
-		})
+		if !outputJSON {
+			printPartialDNSOutput(output, printedIDs, func(r *perfops.DNSTestResult) string {
+				return r.PerfOutput()
+			})
+		}
 		if output.IsFinished() {
 			break
 		}
+	}
+	if outputJSON {
+		internal.PrintOutputJSON(output)
 	}
 	return nil
 }

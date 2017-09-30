@@ -30,6 +30,7 @@ Flags:
       --debug             Enables debug output
   -F, --from string       A continent, region (e.g eastern europe), country, US state or city
   -h, --help              help for perfops
+  -J, --json              Print the result of a command in JSON format
   -K, --key string        The PerfOps API key (default is $PERFOPS_API_KEY)
   -N, --nodeid intSlice   A comma separated list of node IDs to run a test from
   -v, --version           Prints the version information of perfops

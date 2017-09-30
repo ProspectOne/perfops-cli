@@ -48,5 +48,5 @@ func initLatencyCmd(parentCmd *cobra.Command) {
 
 func runLatency(c *perfops.Client, target, from string, nodeIDs []int, limit int) error {
 	ctx := context.Background()
-	return internal.RunTest(ctx, target, from, nodeIDs, limit, debug, c.Run.Latency, c.Run.LatencyOutput)
+	return internal.RunTest(ctx, target, from, nodeIDs, limit, debug, outputJSON, c.Run.Latency, c.Run.LatencyOutput)
 }

@@ -76,7 +76,7 @@ func runCurl(c *perfops.Client, target string, head, insecure, http2 bool, from 
 		return err
 	}
 
-	if debug {
+	if debug && !outputJSON {
 		fmt.Printf("Test ID: %v\n", testID)
 	}
 
@@ -94,10 +94,15 @@ func runCurl(c *perfops.Client, target string, head, insecure, http2 bool, from 
 			return err
 		}
 
-		internal.PrintPartialOutput(output, printedIDs)
+		if !outputJSON {
+			internal.PrintPartialOutput(output, printedIDs)
+		}
 		if output.IsFinished() {
 			break
 		}
+	}
+	if outputJSON {
+		internal.PrintOutputJSON(output)
 	}
 	return nil
 }
