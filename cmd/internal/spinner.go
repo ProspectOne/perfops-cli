@@ -15,6 +15,7 @@ package internal
 
 import (
 	"fmt"
+	"os"
 	"sync"
 	"time"
 	"unicode/utf8"
@@ -59,7 +60,7 @@ func (s *Spinner) Start() {
 				default:
 					s.mu.Lock()
 					s.erase()
-					fmt.Printf("\r%s ", s.next())
+					fmt.Fprintf(os.Stderr, "\r%s ", s.next())
 					s.mu.Unlock()
 
 					time.Sleep(100 * time.Millisecond)
@@ -103,7 +104,7 @@ func (s *Spinner) erase() {
 	}
 	for _, c := range []string{"\b", " ", "\b"} {
 		for i := 0; i < n; i++ {
-			fmt.Printf(c)
+			fmt.Fprint(os.Stderr, c)
 		}
 	}
 }
