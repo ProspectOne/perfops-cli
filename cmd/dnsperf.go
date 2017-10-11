@@ -29,7 +29,7 @@ var (
 		Use:     "dnsperf [target]",
 		Short:   "Find the time it takes to resolve a DNS record on a target",
 		Long:    `Find the time it takes to resolve a DNS record on a target, e.g., google.com.`,
-		Example: `perfops dnsperf --dns-server 8.8.8.8 bing.com`,
+		Example: `perfops dnsperf bing.com`,
 		Args:    requireTarget(),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := newPerfOpsClient()
@@ -48,7 +48,6 @@ func initDNSPerfCmd(parentCmd *cobra.Command) {
 	parentCmd.AddCommand(dnsPerfCmd)
 	dnsPerfCmd.Flags().StringVarP(&dnsPerfDNSServer, "dns-server", "S", "", "The DNS server to use to query for the test. You can use 127.0.0.1 to use the local resolver for location based benchmarking.")
 	dnsPerfCmd.Flags().IntVarP(&dnsPerfLimit, "limit", "L", 1, "The maximum number of nodes to use")
-	dnsPerfCmd.MarkFlagRequired("dns-server")
 }
 
 func runDNSPerf(c *perfops.Client, target, dnsServer, from string, nodeIDs []int, limit int) error {

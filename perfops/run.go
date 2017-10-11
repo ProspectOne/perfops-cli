@@ -227,7 +227,7 @@ func (s *RunService) DNSPerf(ctx context.Context, perf *DNSPerfRequest) (TestID,
 	if !isValidTarget(perf.Target) {
 		return "", &argError{"target"}
 	}
-	if !isValidTarget(perf.DNSServer) {
+	if perf.DNSServer != "" && !isValidTarget(perf.DNSServer) {
 		return "", &argError{"dns server"}
 	}
 	if !isValidLimit(s.client.apiKey, perf.Limit) {

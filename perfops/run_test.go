@@ -224,8 +224,9 @@ func TestDNSPerf(t *testing.T) {
 		tr         *recordingTransport
 		expReqBody string
 	}{
-		"Required only": {DNSPerfRequest{Target: "example.com", DNSServer: "127.0.0.1"}, &recordingTransport{}, `{"target":"example.com","dnsServer":"127.0.0.1"}`},
-		"With location": {DNSPerfRequest{Target: "example.com", DNSServer: "127.0.0.1", Location: "Asia"}, &recordingTransport{}, `{"target":"example.com","dnsServer":"127.0.0.1","location":"Asia"}`},
+		"Required only": {DNSPerfRequest{Target: "example.com"}, &recordingTransport{}, `{"target":"example.com"}`},
+		"With server":   {DNSPerfRequest{Target: "example.com", DNSServer: "127.0.0.1"}, &recordingTransport{}, `{"target":"example.com","dnsServer":"127.0.0.1"}`},
+		"With location": {DNSPerfRequest{Target: "example.com", Location: "Asia"}, &recordingTransport{}, `{"target":"example.com","location":"Asia"}`},
 	}
 	ctx := context.Background()
 	for name, tc := range reqTestCases {
@@ -250,7 +251,6 @@ func TestDNSPerf(t *testing.T) {
 		err       error
 	}{
 		"Invalid target":     {"meep", "127.0.0.1", 1, "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, &argError{"target"}},
-		"Missing DNS server": {"example.com", "", 1, "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, &argError{"dns server"}},
 		"Invalid DNS server": {"example.com", "127.0", 1, "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, &argError{"dns server"}},
 		"Invalid limit":      {"example.com", "127.0.0.1", freeMaxNodeCap + 1, "", &respondingTransport{resp: dummyResp(201, "POST", `{"id": "135"}`)}, &argError{"limit"}},
 		"HTTP error":         {"example.com", "127.0.0.1", 1, "", &respondingTransport{resp: dummyResp(400, "POST", `{"Error": "an error"}`)}, errors.New(`400: {"Error": "an error"}`)},
