@@ -1,4 +1,5 @@
 # PerfOps cli - Global network testing and benchmarking
+
 [![Build Status](https://semaphoreci.com/api/v1/projects/77896bab-6c47-4549-8018-05f07b60d941/1495977/badge.svg)](https://semaphoreci.com/prospectone/perfops-cli)
 
 A simple command line tool to interact with hundreds of servers around the world. Run benchmarks and debug your infrastructure without leaving your console. [More information](https://perfops.net/cli)
@@ -8,7 +9,8 @@ A simple command line tool to interact with hundreds of servers around the world
 ## Usage
 
 Help screen
-```
+
+```sh
 $ perfops -h
 perfops is a tool to interact with the PerfOps API.
 
@@ -41,7 +43,8 @@ Use "perfops [command] --help" for more information about a command.
 ## Examples
 
 Ping google.com from a random server in Eastern Europe
-```
+
+```sh
 perfops ping --from "eastern europe" google.com
 Node111, Moscow, Russian Federation
 PING google.com (173.194.222.113) 56(84) bytes of data.
@@ -55,7 +58,8 @@ rtt min/avg/max/mdev = 11.433/11.513/11.650/0.157 ms
 ```
 
 Traceroute to google.com from a server located in New York
-```
+
+```sh
  perfops traceroute --from "New York" google.com
 Node15, New York City, United States
 traceroute to google.com (172.217.10.46), 20 hops max, 60 byte packets
@@ -76,7 +80,7 @@ traceroute to google.com (172.217.10.46), 20 hops max, 60 byte packets
 
 Check ICMP latency from 9 servers located in Europe
 
-```
+```sh
 perfops latency --from europe --limit 9 google.com
 Node92, Arezzo, Italy
 7.705
