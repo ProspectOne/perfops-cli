@@ -89,7 +89,7 @@ func runDNSPerf(c *perfops.Client, target, dnsServer, from string, nodeIDs []int
 		}
 
 		if !outputJSON {
-			printPartialDNSOutput(output, printedIDs, func(r *perfops.DNSTestResult) string {
+			printPartialDNSOutput(fmt.Printf, output, printedIDs, func(r *perfops.DNSTestResult) string {
 				return r.PerfOutput()
 			})
 		}

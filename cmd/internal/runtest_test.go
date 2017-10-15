@@ -14,9 +14,11 @@
 package internal
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/ProspectOne/perfops-cli/perfops"
@@ -64,6 +66,57 @@ func TestRunTest(t *testing.T) {
 			err := RunTest(ctx, "target", "location", []int{}, 1, false, false, tc.run, tc.output)
 			if err != tc.err {
 				t.Fatalf("expected %v; got %v", tc.err, err)
+			}
+		})
+	}
+}
+
+func TestPrintPartialOutput(t *testing.T) {
+	testCases := map[string]struct {
+		output     func() *perfops.RunOutput
+		printedIDs map[string]bool
+		exp        string
+	}{
+		"all": {
+			func() *perfops.RunOutput {
+				var o *perfops.RunOutput
+				json.Unmarshal([]byte(`{"id":"706fc55e3377104da01f05569e35a30b","items":[{"id":"bba072473bd034d432df03730e116686","result":{"output":"121","node":{"id":27,"latitude":22.28512548314,"longitude":114.17507171631,"country":{"id":195,"name":"Hong Kong","continent":{"id":2,"name":"Asia","iso":"AS"},"iso":"HK","iso_numeric":"344"},"city":"Hong Kong","sub_region":"Eastern Asia"},"time":1508061924.088372}}],"requested":"sendergram.com","finished":"true","elapsedTime":0.66500000000000004}`), &o)
+				return o
+			},
+			map[string]bool{},
+			"Node27, Hong Kong, Hong Kong\n121\n",
+		},
+		"partially printed": {
+			func() *perfops.RunOutput {
+				var o *perfops.RunOutput
+				json.Unmarshal([]byte(`{"id":"706fc55e3377104da01f05569e35a30b","items":[{"id":"bba072473bd034d432df03730e116686","result":{"output":"121","node":{"id":27,"latitude":22.28512548314,"longitude":114.17507171631,"country":{"id":195,"name":"Hong Kong","continent":{"id":2,"name":"Asia","iso":"AS"},"iso":"HK","iso_numeric":"344"},"city":"Hong Kong","sub_region":"Eastern Asia"},"time":1508061924.088372}}],"requested":"sendergram.com","finished":"true","elapsedTime":0.66500000000000004}`), &o)
+				return o
+			},
+			map[string]bool{"bba072473bd034d432df03730e116686": true},
+			"",
+		},
+		"timeout": {
+			func() *perfops.RunOutput {
+				var o *perfops.RunOutput
+				json.Unmarshal([]byte(`{"id":"706fc55e3377104da01f05569e35a30b","items":[{"id":"bba072473bd034d432df03730e116686","result":{"output":"-2","node":{"id":27,"latitude":22.28512548314,"longitude":114.17507171631,"country":{"id":195,"name":"Hong Kong","continent":{"id":2,"name":"Asia","iso":"AS"},"iso":"HK","iso_numeric":"344"},"city":"Hong Kong","sub_region":"Eastern Asia"},"time":1508061924.088372}}],"requested":"sendergram.com","finished":"true","elapsedTime":0.66500000000000004}`), &o)
+				return o
+			},
+			map[string]bool{},
+			"Node27, Hong Kong, Hong Kong\nThe command timed-out. It either took too long to execute or we could not connect to your target at all.\n",
+		},
+	}
+
+	var b bytes.Buffer
+	printf := func(format string, a ...interface{}) (n int, err error) {
+		return fmt.Fprintf(&b, format, a...)
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			b.Reset()
+			PrintPartialOutput(printf, tc.output(), tc.printedIDs)
+			got := b.String()
+			if got != tc.exp {
+				t.Fatalf("expected %#v; got %#v", tc.exp, got)
 			}
 		})
 	}

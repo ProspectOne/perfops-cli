@@ -95,7 +95,7 @@ func runDNSResolve(c *perfops.Client, target, queryType, dnsServer, from string,
 		}
 
 		if !outputJSON {
-			printPartialDNSOutput(output, printedIDs, func(r *perfops.DNSTestResult) string {
+			printPartialDNSOutput(fmt.Printf, output, printedIDs, func(r *perfops.DNSTestResult) string {
 				o := r.ResolveOutput()
 				return strings.Join(o, "\n")
 			})
@@ -110,7 +110,7 @@ func runDNSResolve(c *perfops.Client, target, queryType, dnsServer, from string,
 	return nil
 }
 
-func printPartialDNSOutput(output *perfops.DNSTestOutput, printedIDs map[string]bool, getOutput func(r *perfops.DNSTestResult) string) {
+func printPartialDNSOutput(printf func(format string, a ...interface{}) (n int, err error), output *perfops.DNSTestOutput, printedIDs map[string]bool, getOutput func(r *perfops.DNSTestResult) string) {
 	for _, item := range output.Items {
 		if printedIDs[item.ID] {
 			continue
@@ -120,10 +120,13 @@ func printPartialDNSOutput(output *perfops.DNSTestOutput, printedIDs map[string]
 		if r.Message == "" {
 			printedIDs[item.ID] = true
 			o := getOutput(r)
-			fmt.Printf("Node%d, %s, %s\n%s\n", n.ID, n.City, n.Country.Name, o)
+			if o == "-2" {
+				o = "The command timed-out. It either took too long to execute or we could not connect to your target at all."
+			}
+			printf("Node%d, %s, %s\n%s\n", n.ID, n.City, n.Country.Name, o)
 		} else if r.Message != "NO DATA" {
 			printedIDs[item.ID] = true
-			fmt.Printf("Node%d, %s, %s\n%s\n", n.ID, n.City, n.Country.Name, r.Message)
+			printf("Node%d, %s, %s\n%s\n", n.ID, n.City, n.Country.Name, r.Message)
 		}
 	}
 }

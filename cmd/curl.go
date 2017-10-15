@@ -95,7 +95,7 @@ func runCurl(c *perfops.Client, target string, head, insecure, http2 bool, from 
 		}
 
 		if !outputJSON {
-			internal.PrintPartialOutput(output, printedIDs)
+			internal.PrintPartialOutput(fmt.Printf, output, printedIDs)
 		}
 		if output.IsFinished() {
 			break

@@ -65,7 +65,7 @@ func RunTest(ctx context.Context, target, location string, nodeIDs []int, limit 
 		}
 
 		if !outputJSON {
-			PrintPartialOutput(output, printedIDs)
+			PrintPartialOutput(fmt.Printf, output, printedIDs)
 		}
 		if output.IsFinished() {
 			break
@@ -78,7 +78,7 @@ func RunTest(ctx context.Context, target, location string, nodeIDs []int, limit 
 }
 
 // PrintPartialOutput prints run items that have been data.
-func PrintPartialOutput(output *perfops.RunOutput, printedIDs map[string]bool) {
+func PrintPartialOutput(printf func(format string, a ...interface{}) (n int, err error), output *perfops.RunOutput, printedIDs map[string]bool) {
 	for _, item := range output.Items {
 		if printedIDs[item.ID] {
 			continue
@@ -87,10 +87,14 @@ func PrintPartialOutput(output *perfops.RunOutput, printedIDs map[string]bool) {
 		n := r.Node
 		if item.Result.Message == "" {
 			printedIDs[item.ID] = true
-			fmt.Printf("Node%d, %s, %s\n%s\n", n.ID, n.City, n.Country.Name, r.Output)
+			o := r.Output
+			if o == "-2" {
+				o = "The command timed-out. It either took too long to execute or we could not connect to your target at all."
+			}
+			printf("Node%d, %s, %s\n%s\n", n.ID, n.City, n.Country.Name, o)
 		} else if r.Message != "NO DATA" {
 			printedIDs[item.ID] = true
-			fmt.Printf("Node%d, %s, %s\n%s\n", n.ID, n.City, n.Country.Name, r.Message)
+			printf("Node%d, %s, %s\n%s\n", n.ID, n.City, n.Country.Name, r.Message)
 		}
 	}
 }
