@@ -45,6 +45,7 @@ type (
 		UserAgent string // optional additional User-Agent fragment
 		apiKey    string
 
+		DNS *DNSService
 		Run *RunService
 	}
 
@@ -117,6 +118,7 @@ func NewClient(opts ...func(c *Client) error) (*Client, error) {
 		}
 	}
 
+	c.DNS = (*DNSService)(&c.common)
 	c.Run = (*RunService)(&c.common)
 
 	return c, nil

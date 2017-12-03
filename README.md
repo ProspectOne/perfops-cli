@@ -25,6 +25,7 @@ Available Commands:
   latency     Run a ICMP latency test on a domain name or IP address
   mtr         Run a MTR test on a domain name or IP address
   ping        Run a ping test on a domain name or IP address
+  credits     Displays the remaing credits
   resolve     Resolve a DNS record on a domain name
   traceroute  Run a traceroute test on a domain name or IP address
 

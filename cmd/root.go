@@ -78,6 +78,7 @@ func Execute() error {
 	initDNSPerfCmd(rootCmd)
 	initDNSResolveCmd(rootCmd)
 	initCurlCmd(rootCmd)
+	initCreditsCmd(rootCmd)
 	return rootCmd.Execute()
 }
 
