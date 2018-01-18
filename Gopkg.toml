@@ -24,3 +24,11 @@
 [[constraint]]
   branch = "master"
   name = "github.com/spf13/cobra"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/nsf/termbox-go"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/gosuri/uilive"

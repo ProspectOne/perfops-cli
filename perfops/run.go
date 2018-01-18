@@ -52,9 +52,10 @@ type (
 
 	// RunResult represents the result of an MTR or ping run.
 	RunResult struct {
-		Node    *Node       `json:"node,omitempty"`
-		Output  interface{} `json:"output,omitempty"`
-		Message string      `json:"message,omitempty"`
+		Node     *Node       `json:"node,omitempty"`
+		Output   interface{} `json:"output,omitempty"`
+		Message  string      `json:"message,omitempty"`
+		Finished interface{} `json:"finished"`
 	}
 
 	// RunItem represents an item of an MTR or ping output.
@@ -343,6 +344,18 @@ func (s *RunService) CurlOutput(ctx context.Context, curlID TestID) (*RunOutput,
 	var v *RunOutput
 	err := s.client.do(req, &v)
 	return v, err
+}
+
+// IsFinished returns a value indicating whether the run result is
+// complete or not.
+func (r *RunResult) IsFinished() bool {
+	if v, ok := r.Finished.(bool); ok {
+		return v
+	}
+	if v, ok := r.Finished.(string); ok {
+		return v == "true"
+	}
+	return false
 }
 
 // IsFinished returns a value indicating whether the whole output is

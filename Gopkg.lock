@@ -2,10 +2,22 @@
 
 
 [[projects]]
+  branch = "master"
+  name = "github.com/gosuri/uilive"
+  packages = ["."]
+  revision = "ac356e6e42cd31fcef8e6aec13ae9ed6fe87713e"
+
+[[projects]]
   name = "github.com/inconshreveable/mousetrap"
   packages = ["."]
   revision = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
   version = "v1.0"
+
+[[projects]]
+  name = "github.com/mattn/go-isatty"
+  packages = ["."]
+  revision = "0360b2af4f38e8d38c7fce2a9f4e702702d73a39"
+  version = "v0.0.3"
 
 [[projects]]
   branch = "master"
@@ -19,9 +31,15 @@
   revision = "e57e3eeb33f795204c1ca35f56c44f83227c6e66"
   version = "v1.0.0"
 
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/sys"
+  packages = ["unix"]
+  revision = "2c42eef0765b9837fbdab12011af7830f55f88f0"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "722cfee8a19b81a673ecf7837a456dee8160373a9e2578397bc813e9eaec3374"
+  inputs-digest = "958f3b3d3bb3fb8efe37e1af7553abdca66893932387705c409a7c9123303da2"
   solver-name = "gps-cdcl"
   solver-version = 1

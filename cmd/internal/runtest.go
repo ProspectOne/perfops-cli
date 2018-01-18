@@ -17,12 +17,35 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"sync"
 	"time"
 
 	"github.com/ProspectOne/perfops-cli/perfops"
+	"github.com/gosuri/uilive"
 )
 
 type (
+	terminalWriter interface {
+		io.Writer
+		Flush() error
+	}
+
+	// Formatter formats the run output.
+	Formatter struct {
+		printID bool
+		s       *Spinner
+		w       terminalWriter
+	}
+
+	// RunOutputResult collects the RunOutput and its error, if any, from
+	// async calls.
+	RunOutputResult struct {
+		mu     sync.Mutex
+		output *perfops.RunOutput
+		err    error
+	}
+
 	runFunc       func(ctx context.Context, req *perfops.RunRequest) (perfops.TestID, error)
 	runOutputFunc func(ctx context.Context, pingID perfops.TestID) (*perfops.RunOutput, error)
 )
@@ -36,67 +59,74 @@ func RunTest(ctx context.Context, target, location string, nodeIDs []int, limit 
 		Limit:    limit,
 	}
 
-	spinner := NewSpinner()
-	fmt.Println("")
-	spinner.Start()
-
+	f := NewFormatter(debug && !outputJSON)
+	f.StartSpinner()
 	testID, err := runTest(ctx, runReq)
-	spinner.Stop()
+	f.StopSpinner()
 	if err != nil {
 		return err
 	}
-
-	if debug && !outputJSON {
-		fmt.Printf("Test ID: %v\n", testID)
-	}
-
-	var output *perfops.RunOutput
-	printedIDs := map[string]bool{}
-	for {
-		spinner.Start()
-		select {
-		case <-time.After(500 * time.Millisecond):
+	res := &RunOutputResult{}
+	go func() {
+		for {
+			select {
+			case <-time.After(200 * time.Millisecond):
+			}
+			output, err := runOutput(ctx, testID)
+			res.SetOutput(output, err)
+			if err != nil {
+				break
+			}
 		}
+	}()
 
-		output, err = runOutput(ctx, testID)
-		spinner.Stop()
-		if err != nil {
+	f.StartSpinner()
+	var o *perfops.RunOutput
+	for {
+		select {
+		case <-time.After(100 * time.Millisecond):
+		}
+		if o, err = res.Output(); err != nil {
 			return err
 		}
-
-		if !outputJSON {
-			PrintPartialOutput(fmt.Printf, output, printedIDs)
+		if !outputJSON && o != nil {
+			f.StopSpinner()
+			PrintOutput(f, o)
 		}
-		if output.IsFinished() {
+		if o != nil && o.IsFinished() {
 			break
 		}
 	}
 	if outputJSON {
-		PrintOutputJSON(output)
+		f.StopSpinner()
+		PrintOutputJSON(o)
 	}
 	return nil
 }
 
-// PrintPartialOutput prints run items that have been data.
-func PrintPartialOutput(printf func(format string, a ...interface{}) (n int, err error), output *perfops.RunOutput, printedIDs map[string]bool) {
+// PrintOutput prints run items that have been data.
+func PrintOutput(f *Formatter, output *perfops.RunOutput) {
+	if f.printID {
+		f.Printf("Test ID: %v\n", output.ID)
+	}
 	for _, item := range output.Items {
-		if printedIDs[item.ID] {
-			continue
-		}
 		r := item.Result
 		n := r.Node
 		if item.Result.Message == "" {
-			printedIDs[item.ID] = true
 			o := r.Output
 			if o == "-2" {
 				o = "The command timed-out. It either took too long to execute or we could not connect to your target at all."
 			}
-			printf("Node%d, %s, %s\n%s\n", n.ID, n.City, n.Country.Name, o)
+			f.Printf("Node%d, %s, %s\n%s\n", n.ID, n.City, n.Country.Name, o)
 		} else if r.Message != "NO DATA" {
-			printedIDs[item.ID] = true
-			printf("Node%d, %s, %s\n%s\n", n.ID, n.City, n.Country.Name, r.Message)
+			f.Printf("Node%d, %s, %s\n%s\n", n.ID, n.City, n.Country.Name, r.Message)
 		}
 	}
+	spinner := f.s.Step()
+	if !output.IsFinished() {
+		f.Printf("%s\n", spinner)
+	}
+	f.w.Flush()
 }
 
 // PrintOutputJSON marshals the output into JSON and prints the JSON.
@@ -107,4 +137,44 @@ func PrintOutputJSON(output interface{}) error {
 	}
 	fmt.Println(string(b))
 	return nil
+}
+
+// NewFormatter returns a new Formatter
+func NewFormatter(printID bool) *Formatter {
+	f := &Formatter{
+		printID: printID,
+		w:       uilive.New(),
+		s:       NewSpinner(),
+	}
+	return f
+}
+
+// StartSpinner starts the spinner.
+func (f *Formatter) StartSpinner() {
+	f.s.Start()
+}
+
+// StopSpinner stops the spinner.
+func (f *Formatter) StopSpinner() {
+	f.s.Stop()
+}
+
+// Printf prints the arguments to the formatters writer.
+func (f *Formatter) Printf(format string, a ...interface{}) (int, error) {
+	return fmt.Fprintf(f.w, format, a...)
+}
+
+// SetOutput sets the output and the error.
+func (g *RunOutputResult) SetOutput(o *perfops.RunOutput, err error) {
+	g.mu.Lock()
+	g.output = o
+	g.err = err
+	g.mu.Unlock()
+}
+
+// Output retruns the output and the error.
+func (g *RunOutputResult) Output() (*perfops.RunOutput, error) {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	return g.output, g.err
 }

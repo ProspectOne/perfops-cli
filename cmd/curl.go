@@ -15,7 +15,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -66,43 +65,49 @@ func runCurl(c *perfops.Client, target string, head, insecure, http2 bool, from 
 		Limit:    limit,
 	}
 
-	spinner := internal.NewSpinner()
-	fmt.Println("")
-	spinner.Start()
+	f := internal.NewFormatter(debug && !outputJSON)
 
+	f.StartSpinner()
 	testID, err := c.Run.Curl(ctx, curlReq)
-	spinner.Stop()
+	f.StopSpinner()
 	if err != nil {
 		return err
 	}
 
-	if debug && !outputJSON {
-		fmt.Printf("Test ID: %v\n", testID)
-	}
-
-	var output *perfops.RunOutput
-	printedIDs := map[string]bool{}
-	for {
-		spinner.Start()
-		select {
-		case <-time.After(500 * time.Millisecond):
+	res := &internal.RunOutputResult{}
+	go func() {
+		for {
+			select {
+			case <-time.After(200 * time.Millisecond):
+			}
+			output, err := c.Run.CurlOutput(ctx, testID)
+			res.SetOutput(output, err)
+			if err != nil {
+				break
+			}
 		}
+	}()
 
-		output, err = c.Run.CurlOutput(ctx, testID)
-		spinner.Stop()
-		if err != nil {
+	f.StartSpinner()
+	var o *perfops.RunOutput
+	for {
+		select {
+		case <-time.After(100 * time.Millisecond):
+		}
+		if o, err = res.Output(); err != nil {
 			return err
 		}
-
-		if !outputJSON {
-			internal.PrintPartialOutput(fmt.Printf, output, printedIDs)
+		if !outputJSON && o != nil {
+			f.StopSpinner()
+			internal.PrintOutput(f, o)
 		}
-		if output.IsFinished() {
+		if o != nil && o.IsFinished() {
 			break
 		}
 	}
 	if outputJSON {
-		internal.PrintOutputJSON(output)
+		f.StopSpinner()
+		internal.PrintOutputJSON(o)
 	}
 	return nil
 }

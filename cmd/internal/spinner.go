@@ -53,18 +53,19 @@ func (s *Spinner) Start() {
 	s.lastFrame = -1
 	go func() {
 		for {
-			for i := 0; i < s.length; i++ {
-				select {
-				case <-s.stopChan:
-					return
-				default:
-					s.mu.Lock()
+			select {
+			case <-s.stopChan:
+				return
+			case <-time.After(100 * time.Millisecond):
+				//default:
+				s.mu.Lock()
+				if s.active {
 					s.erase()
 					fmt.Fprintf(os.Stderr, "\r%s ", s.next())
-					s.mu.Unlock()
-
-					time.Sleep(100 * time.Millisecond)
 				}
+				s.mu.Unlock()
+
+				//time.Sleep(100 * time.Millisecond)
 			}
 		}
 	}()
@@ -80,6 +81,13 @@ func (s *Spinner) Stop() {
 		s.erase()
 		s.stopChan <- struct{}{}
 	}
+}
+
+// Step advances the animation frame by one.
+func (s *Spinner) Step() string {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.next()
 }
 
 func (s *Spinner) current() string {

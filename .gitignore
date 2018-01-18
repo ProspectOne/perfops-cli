@@ -1,6 +1,7 @@
 .local
 release
 .vscode/bookmarks.json
+vendor
 
 # Created by https://www.gitignore.io
 
