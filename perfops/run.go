@@ -381,11 +381,11 @@ func (r *DNSTestResult) PerfOutput() string {
 
 // ResolveOutput returns the unmarshalled output for DNS resolve requests.
 func (r *DNSTestResult) ResolveOutput() []string {
-	var o []string
+	var o string
 	if err := json.Unmarshal(r.Output, &o); err != nil {
-		o = []string{"-"}
+		return []string{"-"}
 	}
-	return o
+	return strings.Split(o, "\n")
 }
 
 // isValidTarget checks if a string is a valid target, i.e., a public

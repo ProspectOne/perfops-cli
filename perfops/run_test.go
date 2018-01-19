@@ -366,7 +366,7 @@ func TestDNSResolveOutput(t *testing.T) {
 		finished bool
 	}{
 		"Incomplete": {&respondingTransport{resp: dummyResp(200, "GET", `{"id":"d1f2408ff","items":[{"id":"734df82","result":{"id":123,"message":"NO DATA"}}]}`)}, nil, false},
-		"Complete":   {&respondingTransport{resp: dummyResp(200, "GET", `{"id": "66b78cfc643ea238e0fd8ab44f512657","items": [{"id": "ae3e8bcd0fbe77d6322b89371d87d96d","result": {"dnsServer": "8.8.8.8","output": ["204.79.197.200","13.107.21.200"],"node": {"id": 5,"latitude": 50.110781326572834,"longitude": 8.68984222412098,"country": {"id": 116,"name": "Germany","continent": {"id": 3,"name": "Europe","iso": "EU"},"iso": "DE","iso_numeric": "276"},"city": "Frankfurt","sub_region": "Western Europe"}}}],"requested": "bing.com","finished": "true"}`)}, nil, true},
+		"Complete":   {&respondingTransport{resp: dummyResp(200, "GET", `{"id": "66b78cfc643ea238e0fd8ab44f512657","items": [{"id": "ae3e8bcd0fbe77d6322b89371d87d96d","result": {"dnsServer": "8.8.8.8","output": "204.79.197.200\n13.107.21.200","node": {"id": 5,"latitude": 50.110781326572834,"longitude": 8.68984222412098,"country": {"id": 116,"name": "Germany","continent": {"id": 3,"name": "Europe","iso": "EU"},"iso": "DE","iso_numeric": "276"},"city": "Frankfurt","sub_region": "Western Europe"}}}],"requested": "bing.com","finished": "true"}`)}, nil, true},
 	}
 	ctx := context.Background()
 	for name, tc := range testCases {
@@ -511,7 +511,7 @@ func TestResolveOuput(t *testing.T) {
 		exp  []string
 	}{
 		"Invalid": {"{}", []string{"-"}},
-		"Valid":   {`{"dnsServer": "8.8.8.8","output": ["204.79.197.200", "13.107.21.200"],"node": {"id": 5,"latitude": 50.110781326572834,"longitude": 8.68984222412098,"country": {"id": 116,"name": "Germany","continent": {"id": 3,"name": "Europe","iso": "EU"},"iso": "DE","iso_numeric": "276"},"city": "Frankfurt","sub_region": "Western Europe"}}`, []string{"204.79.197.200", "13.107.21.200"}},
+		"Valid":   {`{"dnsServer": "8.8.8.8","output": "204.79.197.200\n13.107.21.200","node": {"id": 5,"latitude": 50.110781326572834,"longitude": 8.68984222412098,"country": {"id": 116,"name": "Germany","continent": {"id": 3,"name": "Europe","iso": "EU"},"iso": "DE","iso_numeric": "276"},"city": "Frankfurt","sub_region": "Western Europe"}}`, []string{"204.79.197.200", "13.107.21.200"}},
 	}
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
