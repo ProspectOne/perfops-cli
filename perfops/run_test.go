@@ -386,6 +386,39 @@ func TestDNSResolveOutput(t *testing.T) {
 	}
 }
 
+func TestDNSTestResult_ResolveOutput(t *testing.T) {
+	testCases := map[string]struct {
+		data   []byte
+		output []string
+	}{
+		"String": {[]byte(`{"dnsServer": "8.8.8.8","output": "204.79.197.200\n13.107.21.200","node": {"id": 5,"latitude": 50.110781326572834,"longitude": 8.68984222412098,"country": {"id": 116,"name": "Germany","continent": {"id": 3,"name": "Europe","iso": "EU"},"iso": "DE","iso_numeric": "276"},"city": "Frankfurt","sub_region": "Western Europe"}}`), []string{"204.79.197.200", "13.107.21.200"}},
+		"Array":  {[]byte(`{"dnsServer":"8.8.8.8","output":["104.16.85.20","104.16.87.20","104.16.88.20","104.16.86.20","104.16.89.20"],"node":{"id":127,"latitude":34.021790882354999,"longitude":-118.20224761963,"country":{"id":168,"name":"United States","continent":{"id":4,"name":"North America","iso":"NA"},"iso":"US","iso_numeric":"840","is_eu":false},"city":"Los Angeles","sub_region":"Northern America"},"finished":true,"time":1519397739.7899001}`), []string{"104.16.85.20", "104.16.87.20", "104.16.88.20", "104.16.86.20", "104.16.89.20"}},
+	}
+	eq := func(a, b []string) bool {
+		if len(a) != len(b) {
+			return false
+		}
+		for i := range a {
+			if a[i] != b[i] {
+				return false
+			}
+		}
+		return true
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			var r *DNSTestResult
+			if err := json.Unmarshal(tc.data, &r); err != nil {
+				t.Fatalf("unexpected error %v", err)
+			}
+			exp, got := tc.output, r.ResolveOutput()
+			if !eq(exp, got) {
+				t.Fatalf("expected %v; got %v", exp, got)
+			}
+		})
+	}
+}
+
 func TestCurl(t *testing.T) {
 	reqTestCases := map[string]struct {
 		curlReq    CurlRequest

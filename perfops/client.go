@@ -147,6 +147,16 @@ func (c *Client) do(req *http.Request, v interface{}) error {
 		}
 		return &clientError{Code: resp.StatusCode, Text: string(b)}
 	}
+	if false {
+		b, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+		fmt.Println(string(b))
+		r := bytes.NewReader(b)
+		d := json.NewDecoder(r)
+		return d.Decode(&v)
+	}
 	d := json.NewDecoder(resp.Body)
 	return d.Decode(&v)
 }
