@@ -33,6 +33,7 @@ type (
 	// Node contains informatin about a test node.
 	Node struct {
 		ID        int      `json:"id"`
+		AsNumber  int      `json:"as_number,omitempty"`
 		Latitude  float64  `json:"latitude"`
 		Longitude float64  `json:"longitude"`
 		City      string   `json:"city"`

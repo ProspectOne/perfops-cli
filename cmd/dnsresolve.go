@@ -123,10 +123,10 @@ func printPartialDNSOutput(printf func(format string, a ...interface{}) (n int, 
 			if o == "-2" {
 				o = "The command timed-out. It either took too long to execute or we could not connect to your target at all."
 			}
-			printf("Node%d, %s, %s\n%s\n", n.ID, n.City, n.Country.Name, o)
+			printf("Node%d, AS%d, %s, %s\n%s\n", n.ID, n.AsNumber, n.City, n.Country.Name, o)
 		} else if r.Message != "NO DATA" {
 			printedIDs[item.ID] = true
-			printf("Node%d, %s, %s\n%s\n", n.ID, n.City, n.Country.Name, r.Message)
+			printf("Node%d, AS%d, %s, %s\n%s\n", n.ID, n.AsNumber, n.City, n.Country.Name, r.Message)
 		}
 	}
 }

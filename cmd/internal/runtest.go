@@ -117,9 +117,9 @@ func PrintOutput(f *Formatter, output *perfops.RunOutput) {
 			if o == "-2" {
 				o = "The command timed-out. It either took too long to execute or we could not connect to your target at all."
 			}
-			f.Printf("Node%d, %s, %s\n%s\n", n.ID, n.City, n.Country.Name, o)
+			f.Printf("Node%d, AS%d, %s, %s\n%s\n", n.ID, n.AsNumber, n.City, n.Country.Name, o)
 		} else if r.Message != "NO DATA" {
-			f.Printf("Node%d, %s, %s\n%s\n", n.ID, n.City, n.Country.Name, r.Message)
+			f.Printf("Node%d, AS%d, %s, %s\n%s\n", n.ID, n.AsNumber, n.City, n.Country.Name, r.Message)
 		}
 	}
 	spinner := f.s.Step()
