@@ -26,7 +26,7 @@ func TestInitDNSResolveCmd(t *testing.T) {
 	}{
 		"type":       {[]string{"--type", "TXT"}, func() (interface{}, interface{}) { return dnsResolveType, "TXT" }},
 		"dns-server": {[]string{"--dns-server", "123.234.0.1"}, func() (interface{}, interface{}) { return dnsResolveDNSServer, "123.234.0.1" }},
-		"limit":      {[]string{"--limit", "23"}, func() (interface{}, interface{}) { return dnsPerfLimit, 23 }},
+		"limit":      {[]string{"--limit", "23"}, func() (interface{}, interface{}) { return dnsResolveLimit, 23 }},
 	}
 	parent := &cobra.Command{}
 	for name, tc := range testCases {
