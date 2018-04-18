@@ -47,7 +47,7 @@ Ping google.com from a random server in Eastern Europe
 
 ```sh
 perfops ping --from "eastern europe" google.com
-Node111, Moscow, Russian Federation
+Node111, AS2345, Moscow, Russian Federation
 PING google.com (173.194.222.113) 56(84) bytes of data.
 64 bytes from 173.194.222.113: icmp_seq=1 ttl=50 time=11.6 ms
 64 bytes from 173.194.222.113: icmp_seq=2 ttl=50 time=11.4 ms
@@ -62,7 +62,7 @@ Traceroute to google.com from a server located in New York
 
 ```sh
  perfops traceroute --from "New York" google.com
-Node15, New York City, United States
+Node15, AS2345, New York City, United States
 traceroute to google.com (172.217.10.46), 20 hops max, 60 byte packets
  1  vl223-ar-02.nyc-ny.atlantic.net (45.58.33.35)  0.432 ms  0.420 ms
  2  vl30-ar-01.nyc-ny.as6364.net (45.58.33.1)  0.452 ms  0.411 ms
@@ -83,23 +83,23 @@ Check ICMP latency from 9 servers located in Europe
 
 ```sh
 perfops latency --from europe --limit 9 google.com
-Node92, Arezzo, Italy
+Node92, AS2345, Arezzo, Italy
 7.705
-Node242, Meppel, Netherlands
+Node242,AS2315,  Meppel, Netherlands
 2.753
-Node215, Nottingham, United Kingdom
+Node215, AS2325, Nottingham, United Kingdom
 9.861
-Node85, Kiev, Ukraine
+Node85, AS2305, Kiev, Ukraine
 15.332
-Node196, Riga, Latvia
+Node196, AS9345, Riga, Latvia
 47.940
-Node244, Zürich, Switzerland
+Node244, AS2375, Zürich, Switzerland
 12.591
-Node194, Nuremberg, Germany
+Node194, AS2385, Nuremberg, Germany
 3.697
-Node259, Luxembourg, Luxembourg
+Node259, AS2145, Luxembourg, Luxembourg
 7.928
-Node76, Vilnius, Lithuania
+Node76, AS2645, Vilnius, Lithuania
 24.506
 ```
 
