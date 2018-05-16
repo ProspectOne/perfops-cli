@@ -79,18 +79,18 @@ func TestPrintOutput(t *testing.T) {
 		"all": {
 			func() *perfops.RunOutput {
 				var o *perfops.RunOutput
-				json.Unmarshal([]byte(`{"id":"706fc55e3377104da01f05569e35a30b","items":[{"id":"bba072473bd034d432df03730e116686","result":{"output":"121","node":{"id":27,"as_number":12345,"latitude":22.28512548314,"longitude":114.17507171631,"country":{"id":195,"name":"Hong Kong","continent":{"id":2,"name":"Asia","iso":"AS"},"iso":"HK","iso_numeric":"344"},"city":"Hong Kong","sub_region":"Eastern Asia"},"time":1508061924.088372}}],"requested":"sendergram.com","finished":"true","elapsedTime":0.66500000000000004}`), &o)
+				json.Unmarshal([]byte(`{"id":"706fc55e3377104da01f05569e35a30b","items":[{"id":"bba072473bd034d432df03730e116686","result":{"output":"121","finished": true,"node":{"id":27,"as_number":12345,"latitude":22.28512548314,"longitude":114.17507171631,"country":{"id":195,"name":"Hong Kong","continent":{"id":2,"name":"Asia","iso":"AS"},"iso":"HK","iso_numeric":"344"},"city":"Hong Kong","sub_region":"Eastern Asia"},"time":1508061924.088372}}],"requested":"sendergram.com","finished":"true","elapsedTime":0.66500000000000004}`), &o)
 				return o
 			},
-			"Node27, AS12345, Hong Kong, Hong Kong\n121\n",
+			"\x1b[200DNode27, AS12345, Hong Kong, Hong Kong\n121\n",
 		},
 		"timeout": {
 			func() *perfops.RunOutput {
 				var o *perfops.RunOutput
-				json.Unmarshal([]byte(`{"id":"706fc55e3377104da01f05569e35a30b","items":[{"id":"bba072473bd034d432df03730e116686","result":{"output":"-2","node":{"id":27,"as_number":23456,"latitude":22.28512548314,"longitude":114.17507171631,"country":{"id":195,"name":"Hong Kong","continent":{"id":2,"name":"Asia","iso":"AS"},"iso":"HK","iso_numeric":"344"},"city":"Hong Kong","sub_region":"Eastern Asia"},"time":1508061924.088372}}],"requested":"sendergram.com","finished":"true","elapsedTime":0.66500000000000004}`), &o)
+				json.Unmarshal([]byte(`{"id":"706fc55e3377104da01f05569e35a30b","items":[{"id":"bba072473bd034d432df03730e116686","result":{"output":"-2","finished": true,"node":{"id":27,"as_number":23456,"latitude":22.28512548314,"longitude":114.17507171631,"country":{"id":195,"name":"Hong Kong","continent":{"id":2,"name":"Asia","iso":"AS"},"iso":"HK","iso_numeric":"344"},"city":"Hong Kong","sub_region":"Eastern Asia"},"time":1508061924.088372}}],"requested":"sendergram.com","finished":"true","elapsedTime":0.66500000000000004}`), &o)
 				return o
 			},
-			"Node27, AS23456, Hong Kong, Hong Kong\nThe command timed-out. It either took too long to execute or we could not connect to your target at all.\n",
+			"\x1b[200DNode27, AS23456, Hong Kong, Hong Kong\nThe command timed-out. It either took too long to execute or we could not connect to your target at all.\n",
 		},
 	}
 
@@ -115,6 +115,7 @@ type testTerminalWriter struct {
 func (w *testTerminalWriter) Flush() error { return nil }
 
 func newTestFormatter(w io.Writer, printID bool) *Formatter {
+	termCols, termRows = 200, 50
 	f := &Formatter{
 		printID: printID,
 		w:       &testTerminalWriter{w},

@@ -14,6 +14,7 @@
 package internal
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -36,6 +37,9 @@ type (
 		printID bool
 		s       *Spinner
 		w       terminalWriter
+
+		mu  sync.Mutex
+		buf bytes.Buffer
 	}
 
 	// RunOutputResult collects the RunOutput and its error, if any, from
@@ -80,17 +84,18 @@ func RunTest(ctx context.Context, target, location string, nodeIDs []int, limit 
 		}
 	}()
 
-	f.StartSpinner()
+	if outputJSON {
+		f.StartSpinner()
+	}
 	var o *perfops.RunOutput
 	for {
 		select {
-		case <-time.After(100 * time.Millisecond):
+		case <-time.After(50 * time.Millisecond):
 		}
 		if o, err = res.Output(); err != nil {
 			return err
 		}
 		if !outputJSON && o != nil {
-			f.StopSpinner()
 			PrintOutput(f, o)
 		}
 		if o != nil && o.IsFinished() {
@@ -109,6 +114,20 @@ func PrintOutput(f *Formatter, output *perfops.RunOutput) {
 	if f.printID {
 		f.Printf("Test ID: %v\n", output.ID)
 	}
+	spinner := f.s.Step()
+	if !output.IsFinished() {
+		f.Printf("%s", spinner)
+		if len(output.Items) > 1 {
+			finished := 0
+			for _, item := range output.Items {
+				if item.Result.IsFinished() {
+					finished++
+				}
+			}
+			f.Printf(" %d/%d", finished, len(output.Items))
+		}
+		f.Printf("\n")
+	}
 	for _, item := range output.Items {
 		r := item.Result
 		n := r.Node
@@ -121,12 +140,11 @@ func PrintOutput(f *Formatter, output *perfops.RunOutput) {
 		} else if r.Message != "NO DATA" {
 			f.Printf("Node%d, AS%d, %s, %s\n%s\n", n.ID, n.AsNumber, n.City, n.Country.Name, r.Message)
 		}
+		if !item.Result.IsFinished() {
+			f.Printf("%s\n", spinner)
+		}
 	}
-	spinner := f.s.Step()
-	if !output.IsFinished() {
-		f.Printf("%s\n", spinner)
-	}
-	f.w.Flush()
+	f.Flush(!output.IsFinished())
 }
 
 // PrintOutputJSON marshals the output into JSON and prints the JSON.
@@ -161,7 +179,53 @@ func (f *Formatter) StopSpinner() {
 
 // Printf prints the arguments to the formatters writer.
 func (f *Formatter) Printf(format string, a ...interface{}) (int, error) {
-	return fmt.Fprintf(f.w, format, a...)
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	return fmt.Fprintf(&f.buf, format, a...)
+}
+
+// Flush writes to w and resets the buffer. It should be called after the
+// last call to Printf to ensure that any data buffered in the Writer is
+// written to output.
+// Any incomplete escape sequence at the end is considered complete for
+// formatting purposes.
+// An error is returned if the contents of the buffer cannot be written
+// to the underlying output stream
+func (f *Formatter) Flush(limit bool) error {
+	cols, rows := termSize()
+
+	f.mu.Lock()
+	defer f.mu.Unlock()
+
+	if len(f.buf.Bytes()) == 0 {
+		return nil
+	}
+
+	out := string(f.buf.Bytes())
+	if limit {
+		width := 0
+		lines := 0
+		for i, r := range out {
+			if r == '\n' {
+				width = 0
+				lines++
+			} else if width++; width > cols {
+				width = 0
+				lines++
+			}
+			if lines == rows {
+				out = out[0:i]
+				break
+			}
+		}
+	}
+	termStartOfRow(f.w)
+	_, err := f.w.Write([]byte(out))
+	f.buf.Reset()
+	if err != nil {
+		return err
+	}
+	return f.w.Flush()
 }
 
 // SetOutput sets the output and the error.
