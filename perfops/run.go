@@ -56,6 +56,7 @@ type (
 		Output   interface{} `json:"output,omitempty"`
 		Message  string      `json:"message,omitempty"`
 		Finished interface{} `json:"finished"`
+		Timing   *RunTiming  `json:"timing,omitempty"`
 	}
 
 	// RunItem represents an item of an MTR or ping output.
@@ -70,6 +71,14 @@ type (
 		Requested string     `json:"requested,omitempty"`
 		Finished  string     `json:"finished"`
 		Items     []*RunItem `json:"items,omitempty"`
+	}
+
+	// RunTiming represents the test timings.
+	RunTiming struct {
+		Total   float64 `json:"total,omitempty,string"`
+		DNS     float64 `json:"dns,omitempty,string"`
+		Connect float64 `json:"connect,omitempty,string"`
+		TTFB    float64 `json:"ttfb,omityempty,string"`
 	}
 
 	// DNSPerfRequest represents the parameters for a DNS perf request.
