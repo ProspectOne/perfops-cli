@@ -200,29 +200,29 @@ func (f *Formatter) Flush(limit bool) error {
 	if len(f.buf.Bytes()) == 0 {
 		return nil
 	}
+	defer f.buf.Reset()
 
-	out := string(f.buf.Bytes())
+	termStartOfRow(f.w)
 	if limit {
+		out := string(f.buf.Bytes())
 		width := 0
 		lines := 0
-		for i, r := range out {
-			if r == '\n' {
+		for _, r := range out {
+			width++
+			if r == '\n' || width > cols {
 				width = 0
 				lines++
-			} else if width++; width > cols {
-				width = 0
-				lines++
-			}
-			if lines == rows {
-				out = out[0:i]
-				break
+				if lines == rows {
+					break
+				}
+				if _, err := f.w.Write([]byte("\n")); err != nil {
+					return err
+				}
+			} else if _, err := f.w.Write([]byte(string(r))); err != nil {
+				return err
 			}
 		}
-	}
-	termStartOfRow(f.w)
-	_, err := f.w.Write([]byte(out))
-	f.buf.Reset()
-	if err != nil {
+	} else if _, err := f.w.Write(f.buf.Bytes()); err != nil {
 		return err
 	}
 	return f.w.Flush()
