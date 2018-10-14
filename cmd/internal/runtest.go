@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strings"
 	"sync"
 	"time"
 
@@ -135,6 +136,13 @@ func PrintOutput(f *Formatter, output *perfops.RunOutput) {
 			o := r.Output
 			if o == "-2" {
 				o = "The command timed-out. It either took too long to execute or we could not connect to your target at all."
+			} else if a, ok := o.([]interface{}); ok {
+				sb := strings.Builder{}
+				for _, i := range a {
+					sb.WriteString(fmt.Sprintf("%s\n", i))
+				}
+				s := sb.String()
+				o = s[:len(s)-1]
 			}
 			f.Printf("Node%d, AS%d, %s, %s\n%s\n", n.ID, n.AsNumber, n.City, n.Country.Name, o)
 		} else if r.Message != "NO DATA" {
@@ -197,14 +205,15 @@ func (f *Formatter) Flush(limit bool) error {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 
-	if len(f.buf.Bytes()) == 0 {
+	buf := f.buf.Bytes()
+	f.buf.Reset()
+	if len(buf) == 0 {
 		return nil
 	}
-	defer f.buf.Reset()
 
 	termStartOfRow(f.w)
 	if limit {
-		out := string(f.buf.Bytes())
+		out := string(buf)
 		width := 0
 		lines := 0
 		for _, r := range out {
@@ -222,7 +231,7 @@ func (f *Formatter) Flush(limit bool) error {
 				return err
 			}
 		}
-	} else if _, err := f.w.Write(f.buf.Bytes()); err != nil {
+	} else if _, err := f.w.Write(buf); err != nil {
 		return err
 	}
 	return f.w.Flush()
