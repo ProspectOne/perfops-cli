@@ -69,7 +69,7 @@ type (
 	RunOutput struct {
 		ID        string     `json:"id,omitempty"`
 		Requested string     `json:"requested,omitempty"`
-		Finished  string     `json:"finished"`
+		Finished  bool       `json:"finished"`
 		Items     []*RunItem `json:"items,omitempty"`
 	}
 
@@ -118,7 +118,7 @@ type (
 	DNSTestOutput struct {
 		ID        string         `json:"id,omitempty"`
 		Requested string         `json:"requested,omitempty"`
-		Finished  string         `json:"finished"`
+		Finished  bool           `json:"finished"`
 		Items     []*DNSTestItem `json:"items,omitempty"`
 	}
 
@@ -370,13 +370,13 @@ func (r *RunResult) IsFinished() bool {
 // IsFinished returns a value indicating whether the whole output is
 // complete or not.
 func (o *RunOutput) IsFinished() bool {
-	return o.Finished == "true"
+	return o.Finished == true
 }
 
 // IsFinished returns a value indicating whether the whole output is
 // complete or not.
 func (o *DNSTestOutput) IsFinished() bool {
-	return o.Finished == "true"
+	return o.Finished == true
 }
 
 // PerfOutput returns the unmarshalled output for DNS perf requests.
