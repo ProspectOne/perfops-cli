@@ -110,7 +110,7 @@ func TestLatencyOutput(t *testing.T) {
 		t.Fatalf("expected path %v; got %v", exp, got)
 	}
 
-	const body = `{"id": "2e9fd0e3a444adddb9b8168e6e0f856c","items": [{"id": "186b4c4c77985f75e7cefc48289e79ff","result": {"ip": "74.125.200.113","output": "35.223","node": {"id": 58,"as_number": 12345,"latitude": 22.280042521009999,"longitude": 114.1915512085,"country": {"id": 195,"name": "Hong Kong","continent": {"id": 2,"name": "Asia","iso": "AS"},"iso": "HK","iso_numeric": "344"},"city": "Hong Kong","sub_region": "Eastern Asia"}}}, {"id": "34ae843cf4d341b252a14e3d6b39281f","result": {"output": -1,"message": "100% packet loss","node": {"id": 208,"as_number": 23456,"latitude": 30.255360295637001,"longitude": 120.15712738037,"country": {"id": 62,"name": "China","continent": {"id": 2,"name": "Asia","iso": "AS"},"iso": "CN","iso_numeric": "156"},"city": "Hangzhou","sub_region": "Eastern Asia"}}}],"requested": "google.com","finished": "true"}`
+	const body = `{"id": "2e9fd0e3a444adddb9b8168e6e0f856c","items": [{"id": "186b4c4c77985f75e7cefc48289e79ff","result": {"ip": "74.125.200.113","output": "35.223","node": {"id": 58,"as_number": 12345,"latitude": 22.280042521009999,"longitude": 114.1915512085,"country": {"id": 195,"name": "Hong Kong","continent": {"id": 2,"name": "Asia","iso": "AS"},"iso": "HK","iso_numeric": "344"},"city": "Hong Kong","sub_region": "Eastern Asia"}}}, {"id": "34ae843cf4d341b252a14e3d6b39281f","result": {"output": -1,"message": "100% packet loss","node": {"id": 208,"as_number": 23456,"latitude": 30.255360295637001,"longitude": 120.15712738037,"country": {"id": 62,"name": "China","continent": {"id": 2,"name": "Asia","iso": "AS"},"iso": "CN","iso_numeric": "156"},"city": "Hangzhou","sub_region": "Eastern Asia"}}}],"requested": "google.com","finished": true}`
 	tr2 := &respondingTransport{resp: dummyResp(201, "GET", body)}
 	c, err = newTestClient(tr2)
 	if err != nil {
@@ -281,7 +281,7 @@ func TestDNSPerfOutput(t *testing.T) {
 		finished bool
 	}{
 		"Incomplete": {&respondingTransport{resp: dummyResp(200, "GET", `{"id":"d1f2408ff","items":[{"id":"734df82","result":{"id":123,"message":"NO DATA"}}]}`)}, nil, false},
-		"Complete":   {&respondingTransport{resp: dummyResp(200, "GET", `{"id": "6938330049d86df74bb2d0c76f3479de","items": [{"id": "68d10bfb6a9c7f9c519d17df83bc389e","result": {"dnsServer": "8.8.8.8","output": "35","node": {"id": 5,"as_number": 23456,"latitude": 50.110781326572834,"longitude": 8.68984222412098,"country": {"id": 116,"name": "Germany","continent": {"id": 3,"name": "Europe","iso": "EU"},"iso": "DE","iso_numeric": "276"},"city": "Frankfurt","sub_region": "Western Europe"}}}],"requested": "google.com","finished": "true"}`)}, nil, true},
+		"Complete":   {&respondingTransport{resp: dummyResp(200, "GET", `{"id": "6938330049d86df74bb2d0c76f3479de","items": [{"id": "68d10bfb6a9c7f9c519d17df83bc389e","result": {"dnsServer": "8.8.8.8","output": "35","node": {"id": 5,"as_number": 23456,"latitude": 50.110781326572834,"longitude": 8.68984222412098,"country": {"id": 116,"name": "Germany","continent": {"id": 3,"name": "Europe","iso": "EU"},"iso": "DE","iso_numeric": "276"},"city": "Frankfurt","sub_region": "Western Europe"}}}],"requested": "google.com","finished": true}`)}, nil, true},
 	}
 	ctx := context.Background()
 	for name, tc := range testCases {
@@ -366,7 +366,7 @@ func TestDNSResolveOutput(t *testing.T) {
 		finished bool
 	}{
 		"Incomplete": {&respondingTransport{resp: dummyResp(200, "GET", `{"id":"d1f2408ff","items":[{"id":"734df82","result":{"id":123,"message":"NO DATA"}}]}`)}, nil, false},
-		"Complete":   {&respondingTransport{resp: dummyResp(200, "GET", `{"id": "66b78cfc643ea238e0fd8ab44f512657","items": [{"id": "ae3e8bcd0fbe77d6322b89371d87d96d","result": {"dnsServer": "8.8.8.8","output": "204.79.197.200\n13.107.21.200","node": {"id": 5,"as_number": 23456,"latitude": 50.110781326572834,"longitude": 8.68984222412098,"country": {"id": 116,"name": "Germany","continent": {"id": 3,"name": "Europe","iso": "EU"},"iso": "DE","iso_numeric": "276"},"city": "Frankfurt","sub_region": "Western Europe"}}}],"requested": "bing.com","finished": "true"}`)}, nil, true},
+		"Complete":   {&respondingTransport{resp: dummyResp(200, "GET", `{"id": "66b78cfc643ea238e0fd8ab44f512657","items": [{"id": "ae3e8bcd0fbe77d6322b89371d87d96d","result": {"dnsServer": "8.8.8.8","output": "204.79.197.200\n13.107.21.200","node": {"id": 5,"as_number": 23456,"latitude": 50.110781326572834,"longitude": 8.68984222412098,"country": {"id": 116,"name": "Germany","continent": {"id": 3,"name": "Europe","iso": "EU"},"iso": "DE","iso_numeric": "276"},"city": "Frankfurt","sub_region": "Western Europe"}}}],"requested": "bing.com","finished": true}`)}, nil, true},
 	}
 	ctx := context.Background()
 	for name, tc := range testCases {
@@ -485,7 +485,7 @@ func TestCurlOutput(t *testing.T) {
 		finished bool
 	}{
 		"Incomplete": {&respondingTransport{resp: dummyResp(200, "GET", `{"id":"d1f2408ff","items":[{"id":"734df82","result":{"id":123,"message":"NO DATA"}}]}`)}, nil, false},
-		"Complete":   {&respondingTransport{resp: dummyResp(200, "GET", `{"id": "9b8253c07b53b2db82b05475f9895f4e","items": [{"id": "99e4a2c3d6c8c7e36681515a2d2978e5","result": {"output": "HTTP/1.1 301 Moved Permanently\nContent-length: 0\nLocation: https://github.com/\n\n","node": {"id": 218,"as_number": 23456,"latitude": 49.09803738740174,"longitude": 12.484245300292855,"country": {"id": 116,"name": "Germany","continent": {"id": 3,"name": "Europe","iso": "EU"},"iso": "DE","iso_numeric": "276"},"city": "Falkenstein","sub_region": "Western Europe"}}}],"requested": "github.com","finished": "true"}`)}, nil, true},
+		"Complete":   {&respondingTransport{resp: dummyResp(200, "GET", `{"id": "9b8253c07b53b2db82b05475f9895f4e","items": [{"id": "99e4a2c3d6c8c7e36681515a2d2978e5","result": {"output": "HTTP/1.1 301 Moved Permanently\nContent-length: 0\nLocation: https://github.com/\n\n","node": {"id": 218,"as_number": 23456,"latitude": 49.09803738740174,"longitude": 12.484245300292855,"country": {"id": 116,"name": "Germany","continent": {"id": 3,"name": "Europe","iso": "EU"},"iso": "DE","iso_numeric": "276"},"city": "Falkenstein","sub_region": "Western Europe"}}}],"requested": "github.com","finished": true}`)}, nil, true},
 	}
 	ctx := context.Background()
 	for name, tc := range testCases {
@@ -679,7 +679,7 @@ func TestDoGetRunOutput(t *testing.T) {
 		finished bool
 	}{
 		"Incomplete": {&respondingTransport{resp: dummyResp(200, "GET", `{"id":"d1f2408ff","items":[{"id":"734df82","result":{"id":123,"message":"NO DATA"}}]}`)}, nil, false},
-		"Complete":   {&respondingTransport{resp: dummyResp(200, "GET", `{"id": "65d2bb722be16277e3fa8e8c86d3afb7","items": [{"id": "0981fcaf99f2c1b4a46a22cedb417347","result": {"output": "PING bing.com (204.79.197.200): 56 data bytes\n64 bytes from 204.79.197.200: icmp_seq=0 ttl=119 time=40.348 ms\n64 bytes from 204.79.197.200: icmp_seq=1 ttl=119 time=40.198 ms\n64 bytes from 204.79.197.200: icmp_seq=2 ttl=119 time=40.241 ms\n--- bing.com ping statistics ---\n3 packets transmitted, 3 packets received, 0% packet loss\nround-trip min/avg/max/stddev = 40.198/40.262/40.348/0.063 ms\n","node": {"id": 5,"as_number": 23456,"latitude": 50.110781326572834,"longitude": 8.68984222412098,"country": {"id": 116,"name": "Germany","continent": {"id": 3,"name": "Europe","iso": "EU"},"iso": "DE","iso_numeric": "276"},"city": "Frankfurt","sub_region": "Western Europe"}}}],"requested": "bing.com","finished": "true"}`)}, nil, true},
+		"Complete":   {&respondingTransport{resp: dummyResp(200, "GET", `{"id": "65d2bb722be16277e3fa8e8c86d3afb7","items": [{"id": "0981fcaf99f2c1b4a46a22cedb417347","result": {"output": "PING bing.com (204.79.197.200): 56 data bytes\n64 bytes from 204.79.197.200: icmp_seq=0 ttl=119 time=40.348 ms\n64 bytes from 204.79.197.200: icmp_seq=1 ttl=119 time=40.198 ms\n64 bytes from 204.79.197.200: icmp_seq=2 ttl=119 time=40.241 ms\n--- bing.com ping statistics ---\n3 packets transmitted, 3 packets received, 0% packet loss\nround-trip min/avg/max/stddev = 40.198/40.262/40.348/0.063 ms\n","node": {"id": 5,"as_number": 23456,"latitude": 50.110781326572834,"longitude": 8.68984222412098,"country": {"id": 116,"name": "Germany","continent": {"id": 3,"name": "Europe","iso": "EU"},"iso": "DE","iso_numeric": "276"},"city": "Frankfurt","sub_region": "Western Europe"}}}],"requested": "bing.com","finished": true}`)}, nil, true},
 	}
 	ctx := context.Background()
 	for name, tc := range testCases {

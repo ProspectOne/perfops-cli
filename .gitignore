@@ -1,6 +1,7 @@
 .local
 release
 .vscode
+.idea
 
 # Created by https://www.gitignore.io
 
