@@ -41,10 +41,10 @@ done
 RPM_DSTS="sles/11.4 sles/12.0 sles/12.1 sles/12.2
  opensuse/13.1 opensuse/13.2 opensuse/42.1 opensuse/42.2
  fedora/20 fedora/21 fedora/22 fedora/23 fedora/24 fedora/25 fedora/26 fedora/27 fedora/28
- el/5 el/6 el/7"
+ el/5 el/6 el/7 el/8"
 
 DEB_DSTS="debian/wheezy debian/jessie debian/stretch debian/buster
- ubuntu/trusty ubuntu/utopic ubuntu/vivid ubuntu/wily ubuntu/xenial ubuntu/yakkety ubuntu/zesty ubuntu/artful ubuntu/bionic
+ ubuntu/trusty ubuntu/utopic ubuntu/vivid ubuntu/wily ubuntu/xenial ubuntu/yakkety ubuntu/zesty ubuntu/artful ubuntu/bionic ubuntu/disco
  raspbian/wheezy raspbian/jessie raspbian/stretch raspbian/buster"
 
 if [[ $PACKAGECLOUD_TOKEN ]]; then
