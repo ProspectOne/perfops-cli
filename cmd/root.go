@@ -79,8 +79,7 @@ func Execute() error {
 	initDNSResolveCmd(rootCmd)
 	initCurlCmd(rootCmd)
 	initCreditsCmd(rootCmd)
-	initCountriesCmd(rootCmd)
-	initCitiesCmd(rootCmd)
+	initListCmd(rootCmd)
 	return rootCmd.Execute()
 }
 
