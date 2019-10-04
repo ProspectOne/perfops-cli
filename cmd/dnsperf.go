@@ -45,9 +45,12 @@ var (
 )
 
 func initDNSPerfCmd(parentCmd *cobra.Command) {
-	parentCmd.AddCommand(dnsPerfCmd)
+	addCommonFlags(dnsPerfCmd)
+
 	dnsPerfCmd.Flags().StringVarP(&dnsPerfDNSServer, "dns-server", "S", "", "The DNS server to use to query for the test. You can use 127.0.0.1 to use the local resolver for location based benchmarking.")
 	dnsPerfCmd.Flags().IntVarP(&dnsPerfLimit, "limit", "L", 1, "The maximum number of nodes to use")
+
+	parentCmd.AddCommand(dnsPerfCmd)
 }
 
 func runDNSPerf(c *perfops.Client, target, dnsServer, from string, nodeIDs []int, limit int) error {

@@ -35,9 +35,6 @@ var (
 )
 
 func initListCmd(parentCmd *cobra.Command) {
-	// Disable global flags
-	parentCmd.ResetFlags()
-
 	parentCmd.AddCommand(listCmd)
 }
 

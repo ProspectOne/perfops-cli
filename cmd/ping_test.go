@@ -14,6 +14,7 @@
 package cmd
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/spf13/cobra"
@@ -39,7 +40,9 @@ func TestInitPingCmd(t *testing.T) {
 			if f == nil {
 				t.Fatal("expected flag; got nil")
 			}
-			if got, exp := tc.gotexp(); got != exp {
+
+			got, exp := tc.gotexp();
+			if reflect.DeepEqual(got, exp) == false {
 				t.Fatalf("expected %v; got %v", exp, got)
 			}
 		})
