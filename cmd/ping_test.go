@@ -25,6 +25,11 @@ func TestInitPingCmd(t *testing.T) {
 		args   []string
 		gotexp func() (interface{}, interface{})
 	}{
+		// Common flags
+		"from":   {[]string{"--from", "Europe"}, func() (interface{}, interface{}) { return from, "Europe" }},
+		"nodeid": {[]string{"--nodeid", "1,2,3"}, func() (interface{}, interface{}) { return nodeIDs, []int{1, 2, 3} }},
+		"json":   {[]string{"--json"}, func() (interface{}, interface{}) { return outputJSON, true }},
+
 		"limit": {[]string{"--limit", "23"}, func() (interface{}, interface{}) { return pingLimit, 23 }},
 	}
 	parent := &cobra.Command{}

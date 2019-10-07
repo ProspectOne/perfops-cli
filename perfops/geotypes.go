@@ -10,11 +10,11 @@ type (
 
 	// Country contains information about a country.
 	Country struct {
-		ID         int        `json:"id"`
-		Name       string     `json:"name"`
-		ISO        string     `json:"iso"`
-		ISONumeric string     `json:"isoNumeric"`
-		Continent  *Continent `json:"continent,omitempty"`
+		ID         int         `json:"id"`
+		Name       string      `json:"name"`
+		ISO        string      `json:"iso"`
+		ISONumeric interface{} `json:"isoNumeric"` // TODO: Must fix API to return same type for tests and for list endpoints
+		Continent  *Continent  `json:"continent,omitempty"`
 	}
 
 	// City contains information about a city.
