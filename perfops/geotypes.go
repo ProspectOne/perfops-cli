@@ -13,7 +13,7 @@ type (
 		ID         int        `json:"id"`
 		Name       string     `json:"name"`
 		ISO        string     `json:"iso"`
-		ISONumeric string     `json:"iso_numeric"`
+		ISONumeric string     `json:"isoNumeric"`
 		Continent  *Continent `json:"continent,omitempty"`
 	}
 
