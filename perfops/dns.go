@@ -16,6 +16,7 @@ package perfops
 import (
 	"context"
 	"net/http"
+	"reflect"
 )
 
 type (
@@ -24,15 +25,21 @@ type (
 )
 
 // RemainingCredits retrieves the ramining credits from the server.
-func (s *DNSService) RemainingCredits(ctx context.Context) (int, error) {
+func (s *DNSService) RemainingCredits(ctx context.Context) (interface{}, error) {
 	u := s.client.BasePath + "/remaining-credits"
 	req, _ := http.NewRequest("GET", u, nil)
 	var v *struct {
-		Val int `json:"remaining_credits"`
+		Val interface{} `json:"remaining_credits"`
 	}
 	err := s.client.do(req, &v)
 	if err != nil {
 		return 0, err
 	}
-	return v.Val, nil
+
+	credits := v.Val
+	if "float64" == reflect.TypeOf(v.Val).String() {
+		credits = int(v.Val.(float64))
+	}
+
+	return credits, nil
 }
