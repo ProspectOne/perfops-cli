@@ -22,13 +22,9 @@
 
 
 [[constraint]]
-  branch = "master"
+  version = "~0.0.5"
   name = "github.com/spf13/cobra"
 
 [[constraint]]
-  branch = "master"
-  name = "github.com/nsf/termbox-go"
-
-[[constraint]]
-  branch = "master"
+  version = "~0.0.3"
   name = "github.com/gosuri/uilive"

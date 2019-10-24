@@ -14,6 +14,7 @@
 package cmd
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/spf13/cobra"
@@ -24,6 +25,11 @@ func TestInitMTRCmd(t *testing.T) {
 		args   []string
 		gotexp func() (interface{}, interface{})
 	}{
+		// Common flags
+		"from":   {[]string{"--from", "Europe"}, func() (interface{}, interface{}) { return from, "Europe" }},
+		"nodeid": {[]string{"--nodeid", "1,2,3"}, func() (interface{}, interface{}) { return nodeIDs, []int{1, 2, 3} }},
+		"json":   {[]string{"--json"}, func() (interface{}, interface{}) { return outputJSON, true }},
+
 		"limit": {[]string{"--limit", "23"}, func() (interface{}, interface{}) { return mtrLimit, 23 }},
 	}
 	parent := &cobra.Command{}
@@ -39,7 +45,9 @@ func TestInitMTRCmd(t *testing.T) {
 			if f == nil {
 				t.Fatal("expected flag; got nil")
 			}
-			if got, exp := tc.gotexp(); got != exp {
+
+			got, exp := tc.gotexp();
+			if reflect.DeepEqual(got, exp) == false {
 				t.Fatalf("expected %v; got %v", exp, got)
 			}
 		})

@@ -42,8 +42,9 @@ var (
 )
 
 func initPingCmd(parentCmd *cobra.Command) {
-	parentCmd.AddCommand(pingCmd)
+	addCommonFlags(pingCmd)
 	pingCmd.Flags().IntVarP(&pingLimit, "limit", "L", 1, "The maximum number of nodes to use")
+	parentCmd.AddCommand(pingCmd)
 }
 
 func runPing(c *perfops.Client, target, from string, nodeIDs []int, limit int) error {

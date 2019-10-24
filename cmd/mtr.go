@@ -42,8 +42,9 @@ var (
 )
 
 func initMTRCmd(parentCmd *cobra.Command) {
-	parentCmd.AddCommand(mtrCmd)
+	addCommonFlags(mtrCmd)
 	mtrCmd.Flags().IntVarP(&mtrLimit, "limit", "L", 1, "The maximum number of nodes to use")
+	parentCmd.AddCommand(mtrCmd)
 }
 
 func runMTR(c *perfops.Client, target, from string, nodeIDs []int, limit int) error {

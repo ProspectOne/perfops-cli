@@ -79,6 +79,7 @@ func Execute() error {
 	initDNSResolveCmd(rootCmd)
 	initCurlCmd(rootCmd)
 	initCreditsCmd(rootCmd)
+	initListCmd(rootCmd)
 	return rootCmd.Execute()
 }
 
@@ -89,10 +90,13 @@ func initRootCmd() {
 	rootCmd.PersistentFlags().StringVarP(&apiKey, "key", "K", "", "The PerfOps API key (default is $PERFOPS_API_KEY)")
 	rootCmd.PersistentFlags().BoolVarP(&showVersion, "version", "v", false, "Prints the version information of perfops")
 	rootCmd.PersistentFlags().BoolVarP(&debug, "debug", "", false, "Enables debug output")
+}
 
-	rootCmd.PersistentFlags().StringVarP(&from, "from", "F", "", "A continent, region (e.g eastern europe), country, US state or city")
-	rootCmd.PersistentFlags().IntSliceVarP(&nodeIDs, "nodeid", "N", []int{}, "A comma separated list of node IDs to run a test from")
-	rootCmd.PersistentFlags().BoolVarP(&outputJSON, "json", "J", false, "Print the result of a command in JSON format")
+// Common Flags for almost all tests we have
+func addCommonFlags(cmd *cobra.Command) {
+	cmd.PersistentFlags().StringVarP(&from, "from", "F", "", "A continent, region (e.g eastern europe), country, US state or city")
+	cmd.PersistentFlags().IntSliceVarP(&nodeIDs, "nodeid", "N", []int{}, "A comma separated list of node IDs to run a test from")
+	cmd.PersistentFlags().BoolVarP(&outputJSON, "json", "J", false, "Print the result of a command in JSON format")
 }
 
 // newPerfOpsClient returns a perfops.Client object initialized with the

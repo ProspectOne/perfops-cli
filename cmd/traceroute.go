@@ -42,8 +42,9 @@ var (
 )
 
 func initTracerouteCmd(parentCmd *cobra.Command) {
-	parentCmd.AddCommand(tracerouteCmd)
+	addCommonFlags(tracerouteCmd)
 	tracerouteCmd.Flags().IntVarP(&tracerouteLimit, "limit", "L", 1, "The maximum number of nodes to use")
+	parentCmd.AddCommand(tracerouteCmd)
 }
 
 func runTraceroute(c *perfops.Client, target, from string, nodeIDs []int, limit int) error {

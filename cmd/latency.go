@@ -42,6 +42,7 @@ var (
 )
 
 func initLatencyCmd(parentCmd *cobra.Command) {
+	addCommonFlags(latencyCmd)
 	parentCmd.AddCommand(latencyCmd)
 	latencyCmd.Flags().IntVarP(&latencyLimit, "limit", "L", 1, "The maximum number of nodes to use")
 }
