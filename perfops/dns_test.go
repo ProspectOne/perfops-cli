@@ -17,20 +17,31 @@ import (
 	"testing"
 )
 
-func RemainingCredits(t *testing.T) {
-	ctx := context.Background()
-	const exp = 5
-	const body = `{"remaining-credits": 5}`
-	tr := &respondingTransport{resp: dummyResp(201, "GET", body)}
-	c, err := newTestClient(tr)
-	if err != nil {
-		t.Fatalf("unexpected error %v", err)
+func TestRemainingCredits(t *testing.T) {
+
+	testCases := map[string]struct {
+		expected interface{}
+		body     string
+	}{
+		"numeric": {5, `{"remaining_credits": 5}`},
+		"string":  {"unlimited", `{"remaining_credits": "unlimited"}`},
 	}
-	got, err := c.DNS.RemainingCredits(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error %v", err)
-	}
-	if got != exp {
-		t.Fatalf("expected %v; got %v", exp, got)
+
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			ctx := context.Background()
+			tr := &respondingTransport{resp: dummyResp(201, "GET", tc.body)}
+			c, err := newTestClient(tr)
+			if err != nil {
+				t.Fatalf("unexpected error %v", err)
+			}
+			got, err := c.DNS.RemainingCredits(ctx)
+			if err != nil {
+				t.Fatalf("unexpected error %v", err)
+			}
+			if got != tc.expected {
+				t.Fatalf("expected %v; got %v", tc.expected, got)
+			}
+		})
 	}
 }
