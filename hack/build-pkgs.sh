@@ -44,7 +44,7 @@ RPM_DSTS="sles/11.4 sles/12.0 sles/12.1 sles/12.2
  el/5 el/6 el/7 el/8"
 
 DEB_DSTS="debian/wheezy debian/jessie debian/stretch debian/buster
- ubuntu/trusty ubuntu/utopic ubuntu/vivid ubuntu/wily ubuntu/xenial ubuntu/yakkety ubuntu/zesty ubuntu/artful ubuntu/bionic ubuntu/disco
+ ubuntu/trusty ubuntu/utopic ubuntu/vivid ubuntu/wily ubuntu/xenial ubuntu/yakkety ubuntu/zesty ubuntu/artful ubuntu/bionic ubuntu/disco ubuntu/focal
  raspbian/wheezy raspbian/jessie raspbian/stretch raspbian/buster"
 
 if [[ $PACKAGECLOUD_TOKEN ]]; then
