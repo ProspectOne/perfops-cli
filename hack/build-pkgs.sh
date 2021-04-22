@@ -22,9 +22,9 @@ COMMIT_HASH=$(git rev-parse --short HEAD 2>/dev/null)
 PKG_VERSION="${VERSION:1}"
 
 sudo apt-get install build-essential rpm -y
-gem install --no-ri --no-rdoc fpm
-gem install --no-ri --no-rdoc package_cloud
-gem install --no-ri --no-rdoc rest-client
+sudo gem install --no-document fpm
+sudo gem install --no-document package_cloud
+sudo gem install --no-document rest-client
 
 mkdir -p release/pkgs
 
@@ -32,7 +32,7 @@ PERFOPS_FPM_TARGETS="deb rpm"
 for TARGET in ${PERFOPS_FPM_TARGETS[@]}; do
 	echo "Building package $TARGET"
 	fpm -t $TARGET --rpm-os linux -v $PKG_VERSION -s dir -p release/pkgs/ \
-		-n perfops --license ALv2 --vendor ProspectOne -m "PerfOps Support <dak@prospectone.io>" \
+		-n perfops --license ALv2 --vendor ProspectOne -m "PerfOps Support <team@perfops.net>" \
 		--description 'A simple command line tool to access the Prospect One PerfOps API.' \
 		--url https://perfops.net/cli \
 		release/perfops-linux-amd64=/usr/local/bin/perfops
