@@ -52,12 +52,12 @@ if [[ $PACKAGECLOUD_TOKEN ]]; then
 		if [[ $PKG == *.deb ]]; then
 			for DST in ${DEB_DSTS[@]}; do
 				echo "Uploading $PKG to $DST"
-				package_cloud push p1/perfops/$DST $PKG --skip-errors
+				package_cloud push p1/perfops-test/$DST $PKG --skip-errors
 			done
 		elif [[ $PKG == *.rpm ]]; then
 			for DST in ${RPM_DSTS[@]}; do
 				echo "Uploading $PKG to $DST"
-				package_cloud push p1/perfops/$DST $PKG --skip-errors
+				package_cloud push p1/perfops-test/$DST $PKG --skip-errors
 			done
 		fi
 	done
