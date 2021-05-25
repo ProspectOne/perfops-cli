@@ -33,7 +33,7 @@ for TARGET in ${PERFOPS_FPM_TARGETS[@]}; do
 	echo "Building package $TARGET"
 	fpm -t $TARGET --rpm-os linux -v $PKG_VERSION -s dir -p release/pkgs/ \
 		-n perfops --license ALv2 --vendor ProspectOne -m "PerfOps Support <team@perfops.net>" \
-		--description 'A simple command line tool to access the Prospect One PerfOps API.' \
+		--description "A simple command line tool to access the Prospect One PerfOps API." \
 		--url https://perfops.net/cli \
 		release/perfops-linux-amd64=/usr/local/bin/perfops
 done
@@ -52,12 +52,12 @@ if [[ $PACKAGECLOUD_TOKEN ]]; then
 		if [[ $PKG == *.deb ]]; then
 			for DST in ${DEB_DSTS[@]}; do
 				echo "Uploading $PKG to $DST"
-				package_cloud push p1/perfops-test/$DST $PKG --skip-errors
+				package_cloud push p1/perfops/$DST $PKG --skip-errors
 			done
 		elif [[ $PKG == *.rpm ]]; then
 			for DST in ${RPM_DSTS[@]}; do
 				echo "Uploading $PKG to $DST"
-				package_cloud push p1/perfops-test/$DST $PKG --skip-errors
+				package_cloud push p1/perfops/$DST $PKG --skip-errors
 			done
 		fi
 	done

@@ -1,0 +1,11 @@
+{
+  "plugins":
+  [
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator",
+    "@semantic-release/github",
+    ["@semantic-release/exec", {
+      "publishCmd": "go get -v -d ./ && bash hack/build-all.sh && bash hack/build-pkgs.sh"
+    }]
+  ]
+}
