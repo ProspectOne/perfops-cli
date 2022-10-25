@@ -26,6 +26,7 @@ func TestInitCurlCmd(t *testing.T) {
 		gotexp func() (interface{}, interface{})
 	}{
 		// Common flags
+		"file":   {[]string{"--file", "file.txt"}, func() (interface{}, interface{}) { return fileOut, "file.txt" }},
 		"from":   {[]string{"--from", "Europe"}, func() (interface{}, interface{}) { return from, "Europe" }},
 		"nodeid": {[]string{"--nodeid", "1,2,3"}, func() (interface{}, interface{}) { return nodeIDs, []int{1, 2, 3} }},
 		"json":   {[]string{"--json"}, func() (interface{}, interface{}) { return outputJSON, true }},
@@ -49,7 +50,7 @@ func TestInitCurlCmd(t *testing.T) {
 				t.Fatal("expected flag; got nil")
 			}
 
-			got, exp := tc.gotexp();
+			got, exp := tc.gotexp()
 			if reflect.DeepEqual(got, exp) == false {
 				t.Fatalf("expected %v; got %v", exp, got)
 			}
@@ -81,7 +82,7 @@ func TestRunCurlResolve(t *testing.T) {
 	}
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
-			runCurl(c, "example.com", tc.head, tc.insecure, tc.http2, tc.from, tc.nodeIDs, 12)
+			runCurl(c, "example.com", tc.head, tc.insecure, tc.http2, tc.from, tc.nodeIDs, 12, "file.txt")
 			if got, exp := tr.req.URL.Path, "/run/curl"; got != exp {
 				t.Fatalf("expected %v; got %v", exp, got)
 			}
