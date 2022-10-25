@@ -2,6 +2,7 @@
 release
 .vscode
 .idea
+.history
 
 # Created by https://www.gitignore.io
 

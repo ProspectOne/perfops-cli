@@ -35,7 +35,7 @@ var (
 			if err != nil {
 				return err
 			}
-			return chkRunError(runCurl(c, args[0], curlHead, curlInsecure, curlHTTP2, from, nodeIDs, curlLimit))
+			return chkRunError(runCurl(c, args[0], curlHead, curlInsecure, curlHTTP2, from, nodeIDs, curlLimit, fileOut))
 		},
 	}
 
@@ -43,6 +43,7 @@ var (
 	curlInsecure bool
 	curlHTTP2    bool
 	curlLimit    int
+	fileOut      string
 )
 
 func initCurlCmd(parentCmd *cobra.Command) {
@@ -52,11 +53,13 @@ func initCurlCmd(parentCmd *cobra.Command) {
 	curlCmd.Flags().BoolVarP(&curlInsecure, "insecure", "k", false, "Allow curl to proceed for server connections considered insecure")
 	curlCmd.Flags().BoolVarP(&curlHTTP2, "http2", "", false, "Use HTTP version 2")
 	curlCmd.Flags().IntVarP(&curlLimit, "limit", "L", 1, "The maximum number of nodes to use")
+	curlCmd.Flags().StringVarP(&fileOut, "file", "f", "", "output to file")
 
 	parentCmd.AddCommand(curlCmd)
 }
 
-func runCurl(c *perfops.Client, target string, head, insecure, http2 bool, from string, nodeIDs []int, limit int) error {
+func runCurl(c *perfops.Client, target string, head, insecure, http2 bool, from string, nodeIDs []int, limit int, fileOut string) error {
+
 	ctx := context.Background()
 	curlReq := &perfops.CurlRequest{
 		Target:   target,
@@ -100,6 +103,7 @@ func runCurl(c *perfops.Client, target string, head, insecure, http2 bool, from 
 		if o, err = res.Output(); err != nil {
 			return err
 		}
+
 		if !outputJSON && o != nil {
 			f.StopSpinner()
 			internal.PrintOutput(f, o)
@@ -107,6 +111,10 @@ func runCurl(c *perfops.Client, target string, head, insecure, http2 bool, from 
 		if o != nil && o.IsFinished() {
 			break
 		}
+	}
+	if len(fileOut) > 0 {
+		f.StopSpinner()
+		internal.OutputToFile(f, o, fileOut)
 	}
 	if outputJSON {
 		f.StopSpinner()
