@@ -18,7 +18,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"os"
 	"testing"
@@ -63,7 +62,6 @@ func TestRunTest(t *testing.T) {
 		},
 	}
 
-	fmt.Println("tests", testCases)
 	ctx := context.Background()
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
