@@ -18,7 +18,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
+	"os"
 	"testing"
 
 	"github.com/ProspectOne/perfops-cli/perfops"
@@ -60,6 +62,8 @@ func TestRunTest(t *testing.T) {
 			nil,
 		},
 	}
+
+	fmt.Println("tests", testCases)
 	ctx := context.Background()
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
@@ -111,6 +115,52 @@ func TestPrintOutput(t *testing.T) {
 			got := b.String()
 			if got != tc.exp {
 				t.Fatalf("expected %#v; got %#v", tc.exp, got)
+			}
+		})
+	}
+}
+
+func TestOutputToFile(t *testing.T) {
+	testCases := map[string]struct {
+		output func() *perfops.RunOutput
+		exp    []byte
+	}{
+		"all": {
+			func() *perfops.RunOutput {
+				var o *perfops.RunOutput
+				json.Unmarshal([]byte(`{"id":"706fc55e3377104da01f05569e35a30b","items":[{"id":"bba072473bd034d432df03730e116686","result":{"output":"121","finished": true,"node":{"id":27,"as_number":12345,"latitude":22.28512548314,"longitude":114.17507171631,"country":{"id":195,"name":"Hong Kong","continent":{"id":2,"name":"Asia","iso":"AS"},"iso":"HK","iso_numeric":"344"},"city":"Hong Kong","sub_region":"Eastern Asia"},"time":1508061924.088372}}],"requested":"sendergram.com","finished":true,"elapsedTime":0.66500000000000004}`), &o)
+				return o
+			},
+			[]byte("\x1b[200DNode27, AS12345, Hong Kong, Hong Kong\n121\n"),
+		},
+		"timeout": {
+			func() *perfops.RunOutput {
+				var o *perfops.RunOutput
+				json.Unmarshal([]byte(`{"id":"706fc55e3377104da01f05569e35a30b","items":[{"id":"bba072473bd034d432df03730e116686","result":{"output":"-2","finished": true,"node":{"id":27,"as_number":23456,"latitude":22.28512548314,"longitude":114.17507171631,"country":{"id":195,"name":"Hong Kong","continent":{"id":2,"name":"Asia","iso":"AS"},"iso":"HK","iso_numeric":"344"},"city":"Hong Kong","sub_region":"Eastern Asia"},"time":1508061924.088372}}],"requested":"sendergram.com","finished":true,"elapsedTime":0.66500000000000004}`), &o)
+				return o
+			},
+			[]byte("\x1b[200DNode27, AS23456, Hong Kong, Hong Kong\nThe command timed-out. It either took too long to execute or we could not connect to your target at all.\n"),
+		},
+		"array output": {
+			func() *perfops.RunOutput {
+				var o *perfops.RunOutput
+				json.Unmarshal([]byte(`{"id":"6e0c06f7445bb8c63949f84fcdbdae55","items":[{"id":"2bff5d6b3a4df8a268afca6c60977032","result":{"dnsServer":"","node":{"as_number":197328,"id":103,"latitude":41.030549854339,"longitude":28.987083435058,"country":{"id":93,"name":"Turkey","continent":{"id":2,"name":"Asia","iso":"AS"},"iso":"TR","iso_numeric":"792","is_eu":false},"city":"Istanbul","sub_region":"Western Asia"},"finished":true,"output":["header","  1 row", " 10 row"],"time":1539517079.937741}}],"requested":"ns2.no-ip.com","finished":true,"elapsedTime":2.21,"creditsWithdrawn":1}`), &o)
+				return o
+			},
+			[]byte("\x1b[200DNode103, AS197328, Istanbul, Turkey\nheader\n  1 row\n 10 row\n"),
+		},
+	}
+	var b bytes.Buffer
+	f := newTestFormatter(&b, false)
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			OutputToFile(f, tc.output(), "test.txt")
+			if _, err := os.Stat("test.txt"); err != nil {
+				t.Error("File was not created")
+			}
+			err := os.Remove("test.txt")
+			if err != nil {
+				return
 			}
 		})
 	}

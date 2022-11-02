@@ -57,7 +57,7 @@ type (
 	runOutputFunc func(ctx context.Context, pingID perfops.TestID) (*perfops.RunOutput, error)
 )
 
-// RunTest runs an MTR or ping testm retrives its output and presents it to the user.
+// RunTest runs an MTR or ping test retrieves its output and presents it to the user.
 func RunTest(ctx context.Context, target, location string, nodeIDs []int, limit int, debug, outputJSON bool, runTest runFunc, runOutput runOutputFunc) error {
 	runReq := &perfops.RunRequest{
 		Target:   target,
@@ -112,6 +112,7 @@ func RunTest(ctx context.Context, target, location string, nodeIDs []int, limit 
 	return nil
 }
 
+// formatFileName Returns a file name based on provided string and number
 func formatFileName(name string, index int) string {
 	split := strings.Split(name, ".")
 
@@ -122,7 +123,7 @@ func formatFileName(name string, index int) string {
 
 }
 
-// Outputs perfops response to a file
+// OutputToFile Outputs perfops response to a file or multiple files if more than one check is being ran.
 func OutputToFile(f *Formatter, output *perfops.RunOutput, fileOut string) {
 	if f.printID {
 		f.Printf("Test ID: %v\n", output.ID)
@@ -172,7 +173,11 @@ func OutputToFile(f *Formatter, output *perfops.RunOutput, fileOut string) {
 
 			fmt.Fprintf(w, "Node%d, AS%d, %s, %s\n%s\n", n.ID, n.AsNumber, n.City, n.Country.Name, o)
 
-			w.Flush()
+			err := w.Flush()
+
+			if err != nil {
+				return
+			}
 
 		} else if r.Message != "NO DATA" {
 			fileName := ""
