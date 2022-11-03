@@ -14,11 +14,13 @@
 package internal
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -55,7 +57,7 @@ type (
 	runOutputFunc func(ctx context.Context, pingID perfops.TestID) (*perfops.RunOutput, error)
 )
 
-// RunTest runs an MTR or ping testm retrives its output and presents it to the user.
+// RunTest runs an MTR or ping test retrieves its output and presents it to the user.
 func RunTest(ctx context.Context, target, location string, nodeIDs []int, limit int, debug, outputJSON bool, runTest runFunc, runOutput runOutputFunc) error {
 	runReq := &perfops.RunRequest{
 		Target:   target,
@@ -110,6 +112,98 @@ func RunTest(ctx context.Context, target, location string, nodeIDs []int, limit 
 	return nil
 }
 
+// formatFileName Returns a file name based on provided string and number
+func formatFileName(name string, index int) string {
+	split := strings.Split(name, ".")
+
+	n := split[len(split)-2]
+	split[len(split)-2] = fmt.Sprintf("%v-%x", n, index+1)
+
+	return strings.Join(split, ".")
+
+}
+
+// OutputToFile Outputs perfops response to a file or multiple files if more than one check is being ran.
+func OutputToFile(f *Formatter, output *perfops.RunOutput, fileOut string) {
+	if f.printID {
+		f.Printf("Test ID: %v\n", output.ID)
+	}
+	spinner := f.s.Step()
+	if !output.IsFinished() {
+		f.Printf("%s", spinner)
+		if len(output.Items) > 1 {
+			finished := 0
+			for _, item := range output.Items {
+				if item.Result.IsFinished() {
+					finished++
+				}
+			}
+			f.Printf(" %d/%d", finished, len(output.Items))
+		}
+		f.Printf("\n")
+	}
+	for i, item := range output.Items {
+		r := item.Result
+		n := r.Node
+		if item.Result.Message == "" {
+			o := r.Output
+			if o == "-2" {
+				o = "The command timed-out. It either took too long to execute or we could not connect to your target at all."
+			} else if a, ok := o.([]interface{}); ok {
+				sb := strings.Builder{}
+				for _, i := range a {
+					sb.WriteString(fmt.Sprintf("%s\n", i))
+				}
+				s := sb.String()
+				o = s[:len(s)-1]
+			}
+
+			fileName := ""
+
+			if len(output.Items) > 1 {
+				fileName = formatFileName(fileOut, i)
+			} else {
+				fileName = fileOut
+			}
+
+			file, _ := os.Create(fileName)
+			defer file.Close()
+
+			w := bufio.NewWriter(file)
+
+			fmt.Fprintf(w, "Node%d, AS%d, %s, %s\n%s\n", n.ID, n.AsNumber, n.City, n.Country.Name, o)
+
+			err := w.Flush()
+
+			if err != nil {
+				return
+			}
+
+		} else if r.Message != "NO DATA" {
+			fileName := ""
+
+			if len(output.Items) > 1 {
+				fileName = formatFileName(fileOut, i)
+			} else {
+				fileName = fileOut
+			}
+
+			file, _ := os.Create(fileName)
+			defer file.Close()
+
+			w := bufio.NewWriter(file)
+
+			fmt.Fprintf(w, "Node%d, AS%d, %s, %s\n%s\n", n.ID, n.AsNumber, n.City, n.Country.Name, r.Message)
+
+			w.Flush()
+		}
+		if !item.Result.IsFinished() {
+			f.Printf("%s\n", spinner)
+		}
+	}
+	f.Flush(!output.IsFinished())
+}
+
 // PrintOutput prints run items that have been data.
 func PrintOutput(f *Formatter, output *perfops.RunOutput) {
 	if f.printID {
@@ -143,6 +237,9 @@ func PrintOutput(f *Formatter, output *perfops.RunOutput) {
 				}
 				s := sb.String()
 				o = s[:len(s)-1]
+			}
+			if len(output.Items) > 1 {
+				fmt.Println("Greater Than One")
 			}
 			f.Printf("Node%d, AS%d, %s, %s\n%s\n", n.ID, n.AsNumber, n.City, n.Country.Name, o)
 		} else if r.Message != "NO DATA" {
