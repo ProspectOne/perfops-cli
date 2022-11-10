@@ -5,7 +5,7 @@
     "@semantic-release/release-notes-generator",
     "@semantic-release/github",
     ["@semantic-release/exec", {
-      "publishCmd": "go get -v -d ./ && bash hack/build-all.sh && bash hack/build-pkgs.sh"
+      "publishCmd": "echo \"${nextRelease.notes}\" > /tmp/release-notes.md && goreleaser release --release-notes /tmp/release-notes.md --rm-dist"
     }]
   ]
 }
