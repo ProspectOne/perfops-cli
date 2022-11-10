@@ -1,0 +1,52 @@
+builds:
+  - binary: perfops 
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -mod=vendor
+
+release:
+  prerelease: auto
+
+universal_binaries:
+  - replace: true
+
+brews:
+  -
+    name: perfops
+    homepage: https://github.com/ProspectOne/perfops-cli
+    tap:
+      owner: ProspectOne 
+      name: homebrew-perfops
+    commit_author:
+      name: jrFrazier
+      email: jfrazier@tiggee.com
+archives:
+  - replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      386: i386
+      amd64: x86_64
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+nfpms:
+  - maintainer: "JR Frazier"
+    formats:
+      - deb
+      - rpm
+      - apk
