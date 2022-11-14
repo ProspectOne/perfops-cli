@@ -14,10 +14,6 @@ builds:
 release:
   prerelease: auto
 
-universal_binaries:
-  - id: perfops
-  - replace: true
-
 brews:
   - name: perfops
     homepage: https://github.com/ProspectOne/perfops-cli
