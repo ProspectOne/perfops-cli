@@ -18,8 +18,7 @@ universal_binaries:
   - replace: true
 
 brews:
-  -
-    name: perfops
+  - name: perfops
     homepage: https://github.com/ProspectOne/perfops-cli
     tap:
       owner: ProspectOne 
