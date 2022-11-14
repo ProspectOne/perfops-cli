@@ -26,6 +26,8 @@ brews:
     commit_author:
       name: jrFrazier
       email: jfrazier@tiggee.com
+    install:
+      bin.install "perfops"
 archives:
   - replacements:
       darwin: Darwin
