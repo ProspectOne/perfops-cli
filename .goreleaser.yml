@@ -42,6 +42,7 @@ changelog:
       - '^test:'
 nfpms:
   - maintainer: "JR Frazier"
+    package_name: "perfops"
     formats:
       - deb
       - rpm
