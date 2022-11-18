@@ -18,7 +18,7 @@ jobs:
 
   semantic-release:
     needs: test-package
-    name: publish-package
+    name: semantic-release
     runs-on: ubuntu-latest
     if: ${{ github.ref == 'refs/heads/master' }}
     steps:
