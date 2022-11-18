@@ -42,6 +42,10 @@ jobs:
         with:
           name: goreleaser-deb
           path: dist/gocli2_${{ env.VERSION_NAME }}_linux_arm64.deb
+      - uses: actions/upload-artifact@v2
+        with:
+          name: goreleaser-rpm
+          path: dist/gocli2_${{ env.VERSION_NAME }}_linux_arm64.rpm
 
   deploy:
     needs: goreleaser
@@ -50,6 +54,9 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: goreleaser-deb
+      - uses: actions/download-artifact@v2
+        with:
+          name: goreleaser-rpm
       - run: echo "VERSION_NAME=${GITHUB_REF_NAME:1}" >> $GITHUB_ENV
       - run: echo gocli2_${{ env.VERSION_NAME }}_linux_arm64.deb
       - run: ls -la
