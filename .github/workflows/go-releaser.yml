@@ -41,11 +41,11 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: goreleaser-deb
-          path: dist/gocli2_${{ env.VERSION_NAME }}_linux_arm64.deb
+          path: dist/perfops-cli_${{ env.VERSION_NAME }}_linux_arm64.deb
       - uses: actions/upload-artifact@v2
         with:
           name: goreleaser-rpm
-          path: dist/gocli2_${{ env.VERSION_NAME }}_linux_arm64.rpm
+          path: dist/pefops-cli_${{ env.VERSION_NAME }}_linux_arm64.rpm
 
   deploy:
     needs: goreleaser
@@ -58,12 +58,12 @@ jobs:
         with:
           name: goreleaser-rpm
       - run: echo "VERSION_NAME=${GITHUB_REF_NAME:1}" >> $GITHUB_ENV
-      - run: echo gocli2_${{ env.VERSION_NAME }}_linux_arm64.deb
+      - run: echo pefops-cli_${{ env.VERSION_NAME }}_linux_arm64.deb
       - run: ls -la
       - uses: ProspectOne/upload-packagecloud@v1
         with:
-          DEB-PACKAGE-NAME: gocli2_${{ env.VERSION_NAME }}_linux_arm64.deb
-          RPM-PACKAGE-NAME: gocli2_${{ env.VERSION_NAME }}_linux_arm64.rpm
+          DEB-PACKAGE-NAME: pefops-cli_${{ env.VERSION_NAME }}_linux_arm64.deb
+          RPM-PACKAGE-NAME: pefops-cli_${{ env.VERSION_NAME }}_linux_arm64.rpm
           PACKAGECLOUD-USERNAME: p1
           PACKAGECLOUD-REPO: perfops
           PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
