@@ -16,7 +16,7 @@ jobs:
         env:
           IMPORT: "ProspectOne/perfops-cli"
 
-  publish-package:
+  semantic-release:
     needs: test-package
     name: publish-package
     runs-on: ubuntu-latest
