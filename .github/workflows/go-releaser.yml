@@ -53,7 +53,7 @@ jobs:
       - run: echo "VERSION_NAME=${GITHUB_REF_NAME:1}" >> $GITHUB_ENV
       - run: echo gocli2_${{ env.VERSION_NAME }}_linux_arm64.deb
       - run: ls -la
-      - uses: ProspectOne/upload-packagecloud@v2
+      - uses: ProspectOne/upload-packagecloud@v1
         with:
           DEB-PACKAGE-NAME: gocli2_${{ env.VERSION_NAME }}_linux_arm64.deb
           RPM-PACKAGE-NAME: gocli2_${{ env.VERSION_NAME }}_linux_arm64.rpm
