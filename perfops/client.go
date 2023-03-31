@@ -29,7 +29,7 @@ import (
 const UserAgent = "PerfOps API Go Client"
 
 const (
-	apiRoot    = "https://api.perfops.net"
+	apiRoot    = "https://api.perfops.space"
 	basePath   = apiRoot
 	libVersion = "v1.0.0"
 	userAgent  = UserAgent + "/" + libVersion + " (" + runtime.GOOS + "/" + runtime.GOARCH + ")"
@@ -124,7 +124,7 @@ func NewClient(opts ...func(c *Client) error) (*Client, error) {
 	return c, nil
 }
 
-func (c *Client) DoRequest(req *http.Request, v interface{}) (error) {
+func (c *Client) DoRequest(req *http.Request, v interface{}) error {
 	if err := c.do(req, &v); err != nil {
 		return err
 	}

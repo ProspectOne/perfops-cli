@@ -34,20 +34,26 @@ var (
 			if err != nil {
 				return err
 			}
-			return chkRunError(runMTR(c, args[0], from, nodeIDs, mtrLimit))
+			return chkRunError(runMTR(c, args[0], from, nodeIDs, mtrLimit, mtrIpv6))
 		},
 	}
 
 	mtrLimit int
+	mtrIpv6  bool
 )
 
 func initMTRCmd(parentCmd *cobra.Command) {
 	addCommonFlags(mtrCmd)
 	mtrCmd.Flags().IntVarP(&mtrLimit, "limit", "L", 1, "The maximum number of nodes to use")
+	mtrCmd.Flags().BoolVarP(&mtrIpv6, "ipv6", "6", false, "Use IPv6")
 	parentCmd.AddCommand(mtrCmd)
 }
 
-func runMTR(c *perfops.Client, target, from string, nodeIDs []int, limit int) error {
+func runMTR(c *perfops.Client, target, from string, nodeIDs []int, limit int, ipv6 bool) error {
 	ctx := context.Background()
-	return internal.RunTest(ctx, target, from, nodeIDs, limit, debug, outputJSON, c.Run.MTR, c.Run.MTROutput)
+	ipversion := 4
+	if ipv6 {
+		ipversion = 6
+	}
+	return internal.RunTest(ctx, target, from, nodeIDs, limit, ipversion, debug, outputJSON, c.Run.MTR, c.Run.MTROutput)
 }

@@ -36,12 +36,13 @@ var (
 			if err != nil {
 				return err
 			}
-			return chkRunError(runDNSPerf(c, args[0], dnsPerfDNSServer, from, nodeIDs, dnsPerfLimit))
+			return chkRunError(runDNSPerf(c, args[0], dnsPerfDNSServer, from, nodeIDs, dnsPerfLimit, dnsPerfIpv6))
 		},
 	}
 
 	dnsPerfDNSServer string
 	dnsPerfLimit     int
+	dnsPerfIpv6      bool
 )
 
 func initDNSPerfCmd(parentCmd *cobra.Command) {
@@ -49,18 +50,24 @@ func initDNSPerfCmd(parentCmd *cobra.Command) {
 
 	dnsPerfCmd.Flags().StringVarP(&dnsPerfDNSServer, "dns-server", "S", "", "The DNS server to use to query for the test. You can use 127.0.0.1 to use the local resolver for location based benchmarking.")
 	dnsPerfCmd.Flags().IntVarP(&dnsPerfLimit, "limit", "L", 1, "The maximum number of nodes to use")
+	dnsPerfCmd.Flags().BoolVarP(&dnsPerfIpv6, "ipv6", "6", false, "Use IPv6")
 
 	parentCmd.AddCommand(dnsPerfCmd)
 }
 
-func runDNSPerf(c *perfops.Client, target, dnsServer, from string, nodeIDs []int, limit int) error {
+func runDNSPerf(c *perfops.Client, target, dnsServer, from string, nodeIDs []int, limit int, ipv6 bool) error {
 	ctx := context.Background()
+	ipversion := 4
+	if ipv6 {
+		ipversion = 6
+	}
 	dnsPerfReq := &perfops.DNSPerfRequest{
 		Target:    target,
 		DNSServer: dnsServer,
 		Location:  from,
 		Nodes:     nodeIDs,
 		Limit:     limit,
+		IPVersion: ipversion,
 	}
 
 	spinner := internal.NewSpinner()
