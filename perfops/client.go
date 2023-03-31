@@ -124,7 +124,7 @@ func NewClient(opts ...func(c *Client) error) (*Client, error) {
 	return c, nil
 }
 
-func (c *Client) DoRequest(req *http.Request, v interface{}) (error) {
+func (c *Client) DoRequest(req *http.Request, v interface{}) error {
 	if err := c.do(req, &v); err != nil {
 		return err
 	}

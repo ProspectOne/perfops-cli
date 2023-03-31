@@ -46,7 +46,7 @@ func TestInitPingCmd(t *testing.T) {
 				t.Fatal("expected flag; got nil")
 			}
 
-			got, exp := tc.gotexp();
+			got, exp := tc.gotexp()
 			if reflect.DeepEqual(got, exp) == false {
 				t.Fatalf("expected %v; got %v", exp, got)
 			}
@@ -58,10 +58,12 @@ func TestRunPing(t *testing.T) {
 	testCases := map[string]struct {
 		from    string
 		nodeIDs []int
+		ipv6    bool
 		exp     string
 	}{
-		"Location": {"From here", []int{}, `{"target":"example.com","location":"From here","limit":12}`},
-		"NodeID":   {"", []int{123}, `{"target":"example.com","nodes":"123","limit":12}`},
+		"Location": {"From here", []int{}, false, `{"target":"example.com","location":"From here","limit":12,"ipversion":4}`},
+		"NodeID":   {"", []int{123}, false, `{"target":"example.com","nodes":"123","limit":12,"ipversion":4}`},
+		"IPv6":     {"", []int{}, true, `{"target":"example.com","limit":12,"ipversion":6}`},
 	}
 	// We're only interested in the first HTTP call, e.g., the one to get the test ID
 	// to validate our parameters got passed properly.
@@ -72,7 +74,7 @@ func TestRunPing(t *testing.T) {
 	}
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
-			runPing(c, "example.com", tc.from, tc.nodeIDs, 12)
+			runPing(c, "example.com", tc.from, tc.nodeIDs, 12, tc.ipv6)
 			if got, exp := tr.req.URL.Path, "/run/ping"; got != exp {
 				t.Fatalf("expected %v; got %v", exp, got)
 			}

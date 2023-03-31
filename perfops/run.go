@@ -48,6 +48,8 @@ type (
 		Location string `json:"location,omitempty"`
 		// Max number of nodes
 		Limit int `json:"limit,omitempty"`
+		// IP Version
+		IPVersion int `json:"ipversion,omitempty"`
 	}
 
 	// RunResult represents the result of an MTR or ping run.
@@ -88,6 +90,7 @@ type (
 		Nodes     NodeIDs `json:"nodes,omitempty"`
 		Location  string  `json:"location,omitempty"`
 		Limit     int     `json:"limit,omitempty"`
+		IPVersion int     `json:"ipversion,omitempty""`
 	}
 
 	// DNSResolveRequest represents the parameters for a DNS resolve request.
@@ -124,13 +127,14 @@ type (
 
 	// CurlRequest represents the parameters for a curl request.
 	CurlRequest struct {
-		Target   string  `json:"target,omitempty"`
-		Head     bool    `json:"head"`
-		Insecure bool    `json:"insecure,omitempty"`
-		HTTP2    bool    `json:"http2,omitempty"`
-		Nodes    NodeIDs `json:"nodes,omitempty"`
-		Location string  `json:"location,omitempty"`
-		Limit    int     `json:"limit,omitempty"`
+		Target    string  `json:"target,omitempty"`
+		Head      bool    `json:"head"`
+		Insecure  bool    `json:"insecure,omitempty"`
+		HTTP2     bool    `json:"http2,omitempty"`
+		Nodes     NodeIDs `json:"nodes,omitempty"`
+		Location  string  `json:"location,omitempty"`
+		Limit     int     `json:"limit,omitempty"`
+		IPVersion int     `json:"ipversion,omitempty"`
 	}
 
 	argError struct {

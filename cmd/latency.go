@@ -34,20 +34,26 @@ var (
 			if err != nil {
 				return err
 			}
-			return chkRunError(runLatency(c, args[0], from, nodeIDs, latencyLimit))
+			return chkRunError(runLatency(c, args[0], from, nodeIDs, latencyLimit, latencyIpv6))
 		},
 	}
 
 	latencyLimit int
+	latencyIpv6  bool
 )
 
 func initLatencyCmd(parentCmd *cobra.Command) {
 	addCommonFlags(latencyCmd)
 	parentCmd.AddCommand(latencyCmd)
 	latencyCmd.Flags().IntVarP(&latencyLimit, "limit", "L", 1, "The maximum number of nodes to use")
+	latencyCmd.Flags().BoolVarP(&latencyIpv6, "ipv6", "6", false, "Use IPv6")
 }
 
-func runLatency(c *perfops.Client, target, from string, nodeIDs []int, limit int) error {
+func runLatency(c *perfops.Client, target, from string, nodeIDs []int, limit int, ipv6 bool) error {
 	ctx := context.Background()
-	return internal.RunTest(ctx, target, from, nodeIDs, limit, debug, outputJSON, c.Run.Latency, c.Run.LatencyOutput)
+	ipversion := 4
+	if ipv6 {
+		ipversion = 6
+	}
+	return internal.RunTest(ctx, target, from, nodeIDs, limit, ipversion, debug, outputJSON, c.Run.Latency, c.Run.LatencyOutput)
 }
