@@ -34,20 +34,26 @@ var (
 			if err != nil {
 				return err
 			}
-			return chkRunError(runTraceroute(c, args[0], from, nodeIDs, tracerouteLimit))
+			return chkRunError(runTraceroute(c, args[0], from, nodeIDs, tracerouteLimit, tracerouteIpv6))
 		},
 	}
 
 	tracerouteLimit int
+	tracerouteIpv6  bool
 )
 
 func initTracerouteCmd(parentCmd *cobra.Command) {
 	addCommonFlags(tracerouteCmd)
 	tracerouteCmd.Flags().IntVarP(&tracerouteLimit, "limit", "L", 1, "The maximum number of nodes to use")
+	tracerouteCmd.Flags().BoolVarP(&tracerouteIpv6, "ipv6", "6", false, "Use IPv6")
 	parentCmd.AddCommand(tracerouteCmd)
 }
 
-func runTraceroute(c *perfops.Client, target, from string, nodeIDs []int, limit int) error {
+func runTraceroute(c *perfops.Client, target, from string, nodeIDs []int, limit int, ipv6 bool) error {
 	ctx := context.Background()
-	return internal.RunTest(ctx, target, from, nodeIDs, limit, debug, outputJSON, c.Run.Traceroute, c.Run.TracerouteOutput)
+	ipversion := 4
+	if ipv6 {
+		ipversion = 6
+	}
+	return internal.RunTest(ctx, target, from, nodeIDs, limit, ipversion, debug, outputJSON, c.Run.Traceroute, c.Run.TracerouteOutput)
 }

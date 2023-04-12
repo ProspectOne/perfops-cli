@@ -58,12 +58,13 @@ type (
 )
 
 // RunTest runs an MTR or ping test retrieves its output and presents it to the user.
-func RunTest(ctx context.Context, target, location string, nodeIDs []int, limit int, debug, outputJSON bool, runTest runFunc, runOutput runOutputFunc) error {
+func RunTest(ctx context.Context, target, location string, nodeIDs []int, limit int, ipversion int, debug, outputJSON bool, runTest runFunc, runOutput runOutputFunc) error {
 	runReq := &perfops.RunRequest{
-		Target:   target,
-		Location: location,
-		Nodes:    nodeIDs,
-		Limit:    limit,
+		Target:    target,
+		Location:  location,
+		Nodes:     nodeIDs,
+		Limit:     limit,
+		IPVersion: ipversion,
 	}
 
 	f := NewFormatter(debug && !outputJSON)

@@ -32,6 +32,7 @@ func TestInitDNSPerfCmd(t *testing.T) {
 
 		"dns-server": {[]string{"--dns-server", "123.234.0.1"}, func() (interface{}, interface{}) { return dnsPerfDNSServer, "123.234.0.1" }},
 		"limit":      {[]string{"--limit", "23"}, func() (interface{}, interface{}) { return dnsPerfLimit, 23 }},
+		"ipv6":       {[]string{"--ipv6"}, func() (interface{}, interface{}) { return dnsPerfIpv6, true }},
 	}
 	parent := &cobra.Command{}
 	for name, tc := range testCases {
@@ -47,7 +48,7 @@ func TestInitDNSPerfCmd(t *testing.T) {
 				t.Fatal("expected flag; got nil")
 			}
 
-			got, exp := tc.gotexp();
+			got, exp := tc.gotexp()
 			if reflect.DeepEqual(got, exp) == false {
 				t.Fatalf("expected %v; got %v", exp, got)
 			}
@@ -59,10 +60,12 @@ func TestRunDNSPerf(t *testing.T) {
 	testCases := map[string]struct {
 		from    string
 		nodeIDs []int
+		ipv6    bool
 		exp     string
 	}{
-		"Location": {"From here", []int{}, `{"target":"example.com","dnsServer":"127.0.0.1","location":"From here","limit":12}`},
-		"NodeID":   {"", []int{123}, `{"target":"example.com","dnsServer":"127.0.0.1","nodes":"123","limit":12}`},
+		"Location": {"From here", []int{}, false, `{"target":"example.com","dnsServer":"127.0.0.1","location":"From here","limit":12,"ipversion":4}`},
+		"NodeID":   {"", []int{123}, false, `{"target":"example.com","dnsServer":"127.0.0.1","nodes":"123","limit":12,"ipversion":4}`},
+		"IPv6":     {"", []int{}, true, `{"target":"example.com","dnsServer":"127.0.0.1","limit":12,"ipversion":6}`},
 	}
 	// We're only interested in the first HTTP call, e.g., the one to get the test ID
 	// to validate our parameters got passed properly.
@@ -73,7 +76,7 @@ func TestRunDNSPerf(t *testing.T) {
 	}
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
-			runDNSPerf(c, "example.com", "127.0.0.1", tc.from, tc.nodeIDs, 12)
+			runDNSPerf(c, "example.com", "127.0.0.1", tc.from, tc.nodeIDs, 12, tc.ipv6)
 			if got, exp := tr.req.URL.Path, "/run/dns-perf"; got != exp {
 				t.Fatalf("expected %v; got %v", exp, got)
 			}

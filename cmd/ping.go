@@ -34,20 +34,26 @@ var (
 			if err != nil {
 				return err
 			}
-			return chkRunError(runPing(c, args[0], from, nodeIDs, pingLimit))
+			return chkRunError(runPing(c, args[0], from, nodeIDs, pingLimit, pingIpv6))
 		},
 	}
 
 	pingLimit int
+	pingIpv6  bool
 )
 
 func initPingCmd(parentCmd *cobra.Command) {
 	addCommonFlags(pingCmd)
 	pingCmd.Flags().IntVarP(&pingLimit, "limit", "L", 1, "The maximum number of nodes to use")
+	pingCmd.Flags().BoolVarP(&pingIpv6, "ipv6", "6", false, "Use IPv6")
 	parentCmd.AddCommand(pingCmd)
 }
 
-func runPing(c *perfops.Client, target, from string, nodeIDs []int, limit int) error {
+func runPing(c *perfops.Client, target, from string, nodeIDs []int, limit int, ipv6 bool) error {
 	ctx := context.Background()
-	return internal.RunTest(ctx, target, from, nodeIDs, limit, debug, outputJSON, c.Run.Ping, c.Run.PingOutput)
+	ipversion := 4
+	if ipv6 {
+		ipversion = 6
+	}
+	return internal.RunTest(ctx, target, from, nodeIDs, limit, ipversion, debug, outputJSON, c.Run.Ping, c.Run.PingOutput)
 }

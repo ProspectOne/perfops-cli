@@ -35,6 +35,7 @@ func TestInitCurlCmd(t *testing.T) {
 		"insecure": {[]string{"--insecure"}, func() (interface{}, interface{}) { return curlInsecure, true }},
 		"http2":    {[]string{"--http2"}, func() (interface{}, interface{}) { return curlHTTP2, true }},
 		"limit":    {[]string{"--limit", "23"}, func() (interface{}, interface{}) { return curlLimit, 23 }},
+		"ipv6":     {[]string{"--ipv6"}, func() (interface{}, interface{}) { return curlIpv6, true }},
 	}
 	parent := &cobra.Command{}
 	for name, tc := range testCases {
@@ -63,15 +64,17 @@ func TestRunCurlResolve(t *testing.T) {
 		head     bool
 		insecure bool
 		http2    bool
+		ipv6     bool
 		from     string
 		nodeIDs  []int
 		exp      string
 	}{
-		"Head":     {false, false, false, "From here", []int{}, `{"target":"example.com","head":false,"location":"From here","limit":12}`},
-		"Insecure": {true, true, false, "From here", []int{}, `{"target":"example.com","head":true,"insecure":true,"location":"From here","limit":12}`},
-		"HTTP2":    {true, false, true, "From here", []int{}, `{"target":"example.com","head":true,"http2":true,"location":"From here","limit":12}`},
-		"Location": {true, false, false, "From here", []int{}, `{"target":"example.com","head":true,"location":"From here","limit":12}`},
-		"NodeID":   {true, false, false, "", []int{123}, `{"target":"example.com","head":true,"nodes":"123","limit":12}`},
+		"Head":     {false, false, false, false, "From here", []int{}, `{"target":"example.com","head":false,"location":"From here","limit":12,"ipversion":4}`},
+		"Insecure": {true, true, false, false, "From here", []int{}, `{"target":"example.com","head":true,"insecure":true,"location":"From here","limit":12,"ipversion":4}`},
+		"HTTP2":    {true, false, true, false, "From here", []int{}, `{"target":"example.com","head":true,"http2":true,"location":"From here","limit":12,"ipversion":4}`},
+		"Location": {true, false, false, false, "From here", []int{}, `{"target":"example.com","head":true,"location":"From here","limit":12,"ipversion":4}`},
+		"NodeID":   {true, false, false, false, "", []int{123}, `{"target":"example.com","head":true,"nodes":"123","limit":12,"ipversion":4}`},
+		"IPv6":     {false, false, false, true, "", []int{}, `{"target":"example.com","head":false,"limit":12,"ipversion":6}`},
 	}
 	// We're only interested in the first HTTP call, e.g., the one to get the test ID
 	// to validate our parameters got passed properly.
@@ -82,7 +85,7 @@ func TestRunCurlResolve(t *testing.T) {
 	}
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
-			runCurl(c, "example.com", tc.head, tc.insecure, tc.http2, tc.from, tc.nodeIDs, 12, "file.txt")
+			runCurl(c, "example.com", tc.head, tc.insecure, tc.http2, tc.from, tc.nodeIDs, 12, "file.txt", tc.ipv6)
 			if got, exp := tr.req.URL.Path, "/run/curl"; got != exp {
 				t.Fatalf("expected %v; got %v", exp, got)
 			}
